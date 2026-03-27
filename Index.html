@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Truck Game</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #111;
+      color: #fff;
+    }
+
+    header {
+      background: #ff6600;
+      padding: 15px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 28px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 40px 20px;
+      background: url('https://images.unsplash.com/photo-1502877338535-766e1452684a') no-repeat center/cover;
+    }
+
+    .hero h2 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      font-size: 18px;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #ff6600;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .card {
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: #000;
+      margin-top: 20px;
+    }
+
+    /* Mobile Responsive */
+    @media(max-width: 768px) {
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h2 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>🚚 Truck Game</h1>
+</header>
+
+<section class="hero">
+  <h2>Drive the Biggest Trucks!</h2>
+  <p>Enjoy realistic truck driving experience on your mobile & desktop</p>
+  <a href="#" class="btn">Play Now</a>
+</section>
+
+<div class="container">
+  <h2 style="text-align:center; margin-bottom:20px;">Game Features</h2>
+
+  <div class="features">
+    <div class="card">
+      <h3>🚛 Real Trucks</h3>
+      <p>Drive powerful and realistic trucks</p>
+    </div>
+
+    <div class="card">
+      <h3>🗺️ Open World</h3>
+      <p>Explore large maps and highways</p>
+    </div>
+
+    <div class="card">
+      <h3>🎮 Easy Controls</h3>
+      <p>Simple controls for smooth gameplay</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Truck Game | All Rights Reserved</p>
+</footer>
+
+</body>
+</html>
