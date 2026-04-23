@@ -46,10 +46,10 @@ window.onload = () => {
 
  try {
       await addDoc(collection(db, "user"), { name, number });
-      alert("Success");
+    
     } catch (err) {
       console.error(err);
-      alert("Error");
+      
     }
   };
 };
