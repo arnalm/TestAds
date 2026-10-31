@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#2563eb">
 
-<title>My Website</title>
+<title>My PWA Website</title>
 
 <style>
 * {
@@ -18,11 +18,12 @@
 body {
   font-family: Arial, sans-serif;
   background: #f1f5f9;
+  min-height: 100vh;
 }
 
 .main {
-  padding: 60px 20px;
   text-align: center;
+  padding: 60px 20px;
 }
 
 .main h1 {
@@ -34,7 +35,7 @@ body {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.65);
+  background: rgba(0,0,0,0.7);
   justify-content: center;
   align-items: center;
   z-index: 99999;
@@ -44,15 +45,15 @@ body {
 .popup {
   background: white;
   width: 100%;
-  max-width: 350px;
-  padding: 30px 25px;
+  max-width: 360px;
   border-radius: 22px;
+  padding: 30px 25px;
   text-align: center;
   position: relative;
-  animation: show .4s ease;
+  animation: popupShow 0.4s ease;
 }
 
-@keyframes show {
+@keyframes popupShow {
   from {
     transform: translateY(40px);
     opacity: 0;
@@ -63,61 +64,66 @@ body {
   }
 }
 
-.app-icon {
-  width: 80px;
-  height: 80px;
+.appIcon {
+  width: 85px;
+  height: 85px;
+  margin: 0 auto 18px;
   background: #2563eb;
-  border-radius: 20px;
-  margin: auto auto 18px;
+  border-radius: 22px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: 42px;
+  align-items: center;
+  font-size: 45px;
 }
 
 .popup h2 {
+  font-size: 23px;
   color: #222;
   margin-bottom: 12px;
 }
 
 .popup p {
-  color: #666;
   font-size: 14px;
   line-height: 1.6;
+  color: #666;
   margin-bottom: 22px;
 }
 
-.install-btn {
+.installBtn {
   width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
   background: #2563eb;
   color: white;
-  border: none;
-  padding: 15px;
-  border-radius: 12px;
   font-size: 17px;
   font-weight: bold;
   cursor: pointer;
 }
 
-.close-btn {
+.installBtn:active {
+  transform: scale(0.97);
+}
+
+.closeBtn {
   position: absolute;
-  top: 12px;
-  right: 15px;
-  border: none;
-  background: #eee;
-  border-radius: 50%;
-  width: 30px;
+  right: 13px;
+  top: 13px;
   height: 30px;
+  width: 30px;
+  border: none;
+  border-radius: 50%;
+  background: #eee;
   font-size: 20px;
   cursor: pointer;
 }
 
-#message {
+#status {
   margin-top: 15px;
   font-size: 13px;
   color: #2563eb;
+  line-height: 1.5;
 }
-
 </style>
 </head>
 
@@ -125,7 +131,7 @@ body {
 
 <div class="main">
   <h1>Welcome To My Website</h1>
-  <p>Enjoy our website experience!</p>
+  <p>Your website content goes here.</p>
 </div>
 
 <!-- INSTALL POPUP -->
@@ -134,22 +140,22 @@ body {
 
   <div class="popup">
 
-    <button class="close-btn" id="closePopup">×</button>
+    <button class="closeBtn" id="closeBtn">×</button>
 
-    <div class="app-icon">📱</div>
+    <div class="appIcon">📱</div>
 
     <h2>Install Our App</h2>
 
     <p>
-      Hamari website ko apne mobile mein
-      install karein aur app ki tarah use karein.
+      Install our website on your mobile
+      and enjoy a better app experience.
     </p>
 
-    <button class="install-btn" id="installBtn">
+    <button class="installBtn" id="installBtn">
       📲 Install Now
     </button>
 
-    <div id="message"></div>
+    <div id="status"></div>
 
   </div>
 
@@ -157,70 +163,64 @@ body {
 
 <script>
 
-// CREATE PWA MANIFEST
-const manifest = {
+// CREATE MANIFEST IN MEMORY
+// Note: This single-file demo uses a Blob manifest.
+// A production PWA needs a separately hosted manifest.json.
+
+const manifestData = {
   name: "My Website",
   short_name: "MyApp",
-  start_url: "./",
-  scope: "./",
+  start_url: location.href,
   display: "standalone",
   background_color: "#ffffff",
-  theme_color: "#2563eb",
-  icons: [
-    {
-      src: "./icon-192.png",
-      sizes: "192x192",
-      type: "image/png"
-    },
-    {
-      src: "./icon-512.png",
-      sizes: "512x512",
-      type: "image/png"
-    }
-  ]
+  theme_color: "#2563eb"
 };
 
 const manifestBlob = new Blob(
-  [JSON.stringify(manifest)],
-  {type: "application/manifest+json"}
+  [JSON.stringify(manifestData)],
+  { type: "application/manifest+json" }
 );
 
 const manifestURL = URL.createObjectURL(manifestBlob);
 
-const link = document.createElement("link");
-link.rel = "manifest";
-link.href = manifestURL;
-document.head.appendChild(link);
+const manifestLink = document.createElement("link");
+manifestLink.rel = "manifest";
+manifestLink.href = manifestURL;
+document.head.appendChild(manifestLink);
 
 
-// SERVICE WORKER REGISTRATION
-// Production mein service-worker.js alag file honi chahiye.
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js")
-      .catch(error => console.log("SW Error:", error));
-  });
-}
-
-
-// INSTALL POPUP SYSTEM
+// ELEMENTS
+const popup = document.getElementById("installPopup");
+const installBtn = document.getElementById("installBtn");
+const closeBtn = document.getElementById("closeBtn");
+const status = document.getElementById("status");
 
 let deferredPrompt = null;
 
-const popup = document.getElementById("installPopup");
-const installBtn = document.getElementById("installBtn");
-const closeBtn = document.getElementById("closePopup");
-const message = document.getElementById("message");
 
-let isInstalled = false;
-
-if (window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true) {
-  isInstalled = true;
+// CHECK IF ALREADY INSTALLED
+function isAppInstalled() {
+  return window.matchMedia("(display-mode: standalone)").matches ||
+         window.navigator.standalone === true;
 }
 
 
-// Browser install event
+// AUTOMATIC POPUP AFTER 3 SECONDS
+window.addEventListener("load", () => {
+
+  if (!isAppInstalled() &&
+      !sessionStorage.getItem("popupClosed")) {
+
+    setTimeout(() => {
+      popup.style.display = "flex";
+    }, 3000);
+
+  }
+
+});
+
+
+// LISTEN FOR BROWSER INSTALL EVENT
 window.addEventListener("beforeinstallprompt", (event) => {
 
   event.preventDefault();
@@ -232,39 +232,24 @@ window.addEventListener("beforeinstallprompt", (event) => {
 });
 
 
-// Show popup after 3 seconds
-window.addEventListener("load", () => {
-
-  if (!isInstalled &&
-      !sessionStorage.getItem("installPopupClosed")) {
-
-    setTimeout(() => {
-      popup.style.display = "flex";
-    }, 3000);
-
-  }
-
-});
-
-
-// Install button
+// INSTALL BUTTON
 installBtn.addEventListener("click", async () => {
 
   if (deferredPrompt) {
 
     deferredPrompt.prompt();
 
-    const result = await deferredPrompt.userChoice;
+    const choice = await deferredPrompt.userChoice;
 
-    if (result.outcome === "accepted") {
+    if (choice.outcome === "accepted") {
 
-      message.innerText = "Installation accepted!";
+      status.innerText = "Installation accepted!";
 
       popup.style.display = "none";
 
     } else {
 
-      message.innerText = "Installation cancelled.";
+      status.innerText = "Installation cancelled.";
 
     }
 
@@ -272,32 +257,30 @@ installBtn.addEventListener("click", async () => {
 
   } else {
 
-    message.innerText =
-      "Install option abhi available nahi hai. Chrome menu se Add to Home Screen chunein.";
+    status.innerText =
+      "Browser install prompt is not available. Chrome menu se Install App ya Add to Home Screen chunein.";
 
   }
 
 });
 
 
-// Close popup
+// CLOSE POPUP
 closeBtn.addEventListener("click", () => {
 
   popup.style.display = "none";
 
-  sessionStorage.setItem("installPopupClosed", "yes");
+  sessionStorage.setItem("popupClosed", "yes");
 
 });
 
 
-// Successful installation
+// APP INSTALLED EVENT
 window.addEventListener("appinstalled", () => {
-
-  isInstalled = true;
 
   popup.style.display = "none";
 
-  message.innerText = "App Successfully Installed!";
+  status.innerText = "App successfully installed!";
 
 });
 
