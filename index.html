@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Android Install Demo</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+        h1 { color: #333; font-size: 24px; margin-bottom: 10px; }
+        p { color: #666; font-size: 16px; line-height: 1.5; }
+        .install-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            margin: 20px auto 0 auto;
+            transition: background 0.3s;
+            box-shadow: 0 2px 5px rgba(33, 150, 243, 0.4);
+        }
+        .install-btn:hover { background-color: #1976D2; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Welcome to My PWA</h1>
+    <p>This website is optimized for Android. You can install it on your home screen just like a regular mobile app!</p>
+    
+    <!-- Android Install Button -->
+    <button id="androidInstallBtn" class="install-btn">Install App</button>
+</div>
+
+<script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker Registered successfully.'))
+                .catch(err => console.error('Service Worker registration failed:', err));
+        });
+    }
+
+    // Android Install Prompt Logic
+    let deferredPrompt;
+    const installBtn = document.getElementById('androidInstallBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+        // Update UI to notify the user they can install the PWA
+        installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        // Show the install prompt
+        deferredPrompt.prompt();
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to the install prompt: ${outcome}`);
+        // We've used the prompt, so we can't use it again
+        deferredPrompt = null;
+        // Hide the install button
+        installBtn.style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', (evt) => {
+        console.log('PWA was successfully installed on Android device!');
+    });
+</script>
+
+</body>
+</html>
