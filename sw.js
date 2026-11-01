@@ -1,4 +1,4 @@
-/***
+
 const CACHE_NAME = 'pwa-android-cache-v1';
 const ASSETS = [
   './',
@@ -39,7 +39,7 @@ self.addEventListener('fetch', (e) => {
   );
 });
 
-***/
+/***
 const CACHE_NAME = 'my-site-cache-v2'; // हर बड़े अपडेट पर v2, v3 बदलते रहें
 
 // नए सर्विस वर्कर को तुरंत एक्टिवेट करने के लिए
@@ -70,3 +70,4 @@ self.addEventListener('fetch', (event) => {
         })
     );
 });
+***/
