@@ -3,7 +3,7 @@ offline mode codes
 ________________
 ***/
 
-/***
+
 const CACHE_NAME = 'pwa-android-cache-v1';
 const ASSETS = [
   './',
@@ -43,7 +43,7 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
-***/
+
 
 
 /***
@@ -51,7 +51,7 @@ online mode codes
 _________________
 ***/
 
-
+/***
 
 const CACHE_NAME = 'my-site-cache-v2'; // हर बड़े अपडेट पर v2, v3 बदलते रहें
 
@@ -83,5 +83,5 @@ self.addEventListener('fetch', (event) => {
         })
     );
 });
-
+***/
 
