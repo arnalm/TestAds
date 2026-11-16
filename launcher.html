@@ -53,9 +53,9 @@
       margin-top: 20px;
     }
 
-    /* Custom Install App Button (Shuru mein chhupa rahega) */
+    /* Install App Button (Ab hamesha dikhega) */
     #install-btn {
-      display: none;
+      display: block;
       padding: 12px 25px;
       font-size: 16px;
       background-color: #4CAF50;
@@ -67,19 +67,19 @@
       font-weight: bold;
     }
 
-#main-frame {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  border: none;
-  outline: none;
-  margin: 0;
-  padding: 0;
-}
-
+    /* Top line hatane ke liye fixed fullscreen frame */
+    #main-frame {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      outline: none;
+      margin: 0;
+      padding: 0;
+    }
 
     /* iOS / Portrait Fallback Warning */
     #rotate-warning {
@@ -124,7 +124,7 @@
   </div>
 
   <!-- Aapka main content page -->
-  <iframe id="main-frame"></iframe>
+  <iframe id="main-frame" frameborder="0"></iframe>
 
   <script>
     // 1. Service Worker Register karein
@@ -141,33 +141,24 @@
     const installBtn = document.getElementById('install-btn');
 
     window.addEventListener('beforeinstallprompt', (e) => {
-      // Browser ke default mini-infobar ko rokein
       e.preventDefault();
-      // Event ko save karein taaki button click par use kar sakein
       deferredPrompt = e;
-      // Install button ko screen par dikhayein
-      installBtn.style.display = 'block';
     });
 
     installBtn.addEventListener('click', async () => {
       if (deferredPrompt) {
-        // Install prompt dikhayein
         deferredPrompt.prompt();
-        // User ka faisla (Accept/Dismiss) check karein
         const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          console.log('User ne app install kar liya');
-        }
         deferredPrompt = null;
-        installBtn.style.display = 'none';
+      } else {
+        alert("App install karne ke liye:\n1. Browser ke menu (3 dots ya Share icon) par click karein.\n2. 'Add to Home screen' ya 'Install app' chunein.");
       }
     });
 
-    // Jab app install ho jaye toh button chhupa dein
-    window.addEventListener('appinstalled', () => {
+    // Agar app pehle se install hokar khula hai, toh Install button chhupa dein
+    if (window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia('(display-mode: standalone)').matches) {
       installBtn.style.display = 'none';
-      deferredPrompt = null;
-    });
+    }
 
     // 3. Landscape Fullscreen Logic
     function launchLandscapeFullscreen() {
