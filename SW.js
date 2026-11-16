@@ -1,5 +1,4 @@
-
-const CACHE_NAME = 'landscape-pwa-v1';
+const CACHE_NAME = 'landscape-pwa-v3';
 const ASSETS_TO_CACHE = [
   './',
   './launcher.html',
@@ -7,17 +6,15 @@ const ASSETS_TO_CACHE = [
   './manifest.json'
 ];
 
-// Install event: Zaroori files ko cache mein save karein
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  self.skipWaiting();
 });
 
-// Activate event: Purane cache ko clean karein
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -28,15 +25,12 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
-// Fetch event: Offline hone par cache se files load karein
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
