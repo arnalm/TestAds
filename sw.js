@@ -1,86 +1,71 @@
-/***
-offline mode codes
-________________
-***/
 
-/***
-const CACHE_NAME = 'pwa-android-cache-v1';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json'
+const CACHE_NAME = "my-landscape-app-v1";
+
+const FILES = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./app.html",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png"
 ];
 
-// Install Service Worker and cache core files
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
-  );
-});
-
-// Activate and clean up old caches
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(async cache => {
+      await Promise.all(
+        FILES.map(async file => {
+          try {
+            await cache.add(file);
+          } catch (error) {
+            console.log("Cache skipped:", file);
           }
         })
       );
     })
   );
+
+  self.skipWaiting();
 });
 
-// Fetch assets from cache or network
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      return cachedResponse || fetch(e.request);
-    })
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      )
+    )
   );
-});
-***/
 
-
-
-/***
-online mode codes 
-_________________
-***/
-
-
-
-const CACHE_NAME = 'my-site-cache-v2'; // हर बड़े अपडेट पर v2, v3 बदलते रहें
-
-// नए सर्विस वर्कर को तुरंत एक्टिवेट करने के लिए
-self.addEventListener('install', (event) => {
-    self.skipWaiting(); 
+  self.clients.claim();
 });
 
-self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cache) => {
-                    if (cache !== CACHE_NAME) {
-                        console.log('पुराना कैशे हटाया जा रहा है...');
-                        return caches.delete(cache); // पुराना डेटा डिलीट करें
-                    }
-                })
-            );
-        }).then(() => self.clients.claim()) // तुरंत नया कंट्रोल लें
-    );
-});
+self.addEventListener("fetch", event => {
+  if (event.request.method !== "GET") return;
 
-// नेटवर्क से हमेशा नया डेटा लेने का प्रयास करें
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        fetch(event.request).catch(() => {
-            return caches.match(event.request);
-        })
-    );
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        if (response && response.ok) {
+          const copy = response.clone();
+
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, copy);
+          });
+        }
+
+        return response;
+      })
+      .catch(async () => {
+        const cached = await caches.match(event.request);
+
+        if (cached) return cached;
+
+        return new Response("Offline - Page not available", {
+          status: 503
+        });
+      })
+  );
 });
