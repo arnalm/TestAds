@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Landscape Fullscreen PWA</title>
   
-  <!-- PWA Manifest Link -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ff5722">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -26,7 +25,6 @@
       background-color: #000;
     }
 
-    /* Welcome Overlay */
     #start-overlay {
       position: fixed;
       top: 0;
@@ -40,6 +38,7 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
+      padding: 20px;
     }
 
     .landscape-btn {
@@ -51,23 +50,23 @@
       border-radius: 8px;
       cursor: pointer;
       margin-top: 20px;
+      width: 240px;
     }
 
-    /* Install App Button (Ab hamesha dikhega) */
     #install-btn {
-      display: block;
-      padding: 12px 25px;
-      font-size: 16px;
-      background-color: #4CAF50;
+      display: block !important;
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #2e7d32;
       color: white;
-      border: none;
+      border: 2px solid #4caf50;
       border-radius: 8px;
       cursor: pointer;
       margin-top: 15px;
       font-weight: bold;
+      width: 240px;
     }
 
-    /* Top line hatane ke liye fixed fullscreen frame */
     #main-frame {
       display: none;
       position: fixed;
@@ -77,11 +76,8 @@
       height: 100vh;
       border: none;
       outline: none;
-      margin: 0;
-      padding: 0;
     }
 
-    /* iOS / Portrait Fallback Warning */
     #rotate-warning {
       display: none;
       position: fixed;
@@ -108,59 +104,43 @@
 </head>
 <body>
 
-  <!-- iPhone/Portrait Fallback Message -->
   <div id="rotate-warning">
     <h2>📱 Please Rotate Your Phone</h2>
     <p style="margin-top: 10px; color: #aaa;">Behtar experience ke liye apna phone horizontal (landscape) ghumayein.</p>
   </div>
 
-  <!-- Welcome Screen -->
   <div id="start-overlay">
     <h2>Welcome to My App</h2>
     <button class="landscape-btn" onclick="launchLandscapeFullscreen()">Start in Landscape</button>
-    
-    <!-- Custom Install Button -->
-    <button id="install-btn">📲 Install App</button>
+    <button id="install-btn" onclick="installPWA()">📲 Install App</button>
   </div>
 
-  <!-- Aapka main content page -->
   <iframe id="main-frame" frameborder="0"></iframe>
 
   <script>
-    // 1. Service Worker Register karein
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Service Worker registered'))
-          .catch(err => console.log('Service Worker error:', err));
+        navigator.serviceWorker.register('sw.js');
       });
     }
 
-    // 2. Custom Install Button Logic
     let deferredPrompt;
-    const installBtn = document.getElementById('install-btn');
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
     });
 
-    installBtn.addEventListener('click', async () => {
+    async function installPWA() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         deferredPrompt = null;
       } else {
-        alert("App install karne ke liye:\n1. Browser ke menu (3 dots ya Share icon) par click karein.\n2. 'Add to Home screen' ya 'Install app' chunein.");
+        alert("Install karne ke liye:\n\n• Android Chrome: Upar right side mein 3 dots (⋮) par click karein aur 'Add to Home screen' ya 'Install app' par tap karein.\n\n• iPhone Safari: Neeche Share button (⬆️) dabayein aur 'Add to Home Screen' chunein.");
       }
-    });
-
-    // Agar app pehle se install hokar khula hai, toh Install button chhupa dein
-    if (window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia('(display-mode: standalone)').matches) {
-      installBtn.style.display = 'none';
     }
 
-    // 3. Landscape Fullscreen Logic
     function launchLandscapeFullscreen() {
       const elem = document.documentElement;
       const overlay = document.getElementById('start-overlay');
@@ -173,16 +153,8 @@
       frame.src = "index.html"; 
       frame.style.display = 'block';
 
-      requestFullAndLock(elem);
-    }
-
-    function requestFullAndLock(elem) {
       if (elem.requestFullscreen) {
-        elem.requestFullscreen().then(() => {
-          lockLandscape();
-        }).catch((err) => {
-          console.log("Fullscreen error:", err);
-        });
+        elem.requestFullscreen().then(() => lockLandscape()).catch(() => {});
       } else if (elem.webkitRequestFullscreen) {
         elem.webkitRequestFullscreen();
         lockLandscape();
@@ -191,9 +163,7 @@
 
     function lockLandscape() {
       if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock("landscape").catch((err) => {
-          console.log("Orientation lock supported nahi hai:", err);
-        });
+        screen.orientation.lock("landscape").catch(() => {});
       }
     }
 
@@ -211,14 +181,9 @@
       }
     }
 
-    window.addEventListener("popstate", () => {
-      showWelcomeScreen();
-    });
-
+    window.addEventListener("popstate", showWelcomeScreen);
     document.addEventListener("fullscreenchange", () => {
-      if (!document.fullscreenElement) {
-        showWelcomeScreen();
-      }
+      if (!document.fullscreenElement) showWelcomeScreen();
     });
   </script>
 
