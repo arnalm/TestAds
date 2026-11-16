@@ -6,7 +6,7 @@
   "description": "Landscape Fullscreen Progressive Web App",
   "start_url": "./index.html",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#000000",
   "theme_color": "#ff5722",
