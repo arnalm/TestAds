@@ -3,9 +3,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
-  <title>My Landscape PWA</title>
+  <title>My Fullscreen PWA</title>
 
   <meta name="theme-color" content="#ff5722">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,25 +33,28 @@
     #start-overlay {
       position: fixed;
       inset: 0;
+      width: 100%;
+      height: 100%;
       background: #111;
       color: white;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      text-align: center;
       z-index: 9999;
       padding: 20px;
-      text-align: center;
     }
 
     button {
       width: 240px;
+      max-width: 90%;
       padding: 15px;
       margin-top: 15px;
       border: none;
       border-radius: 8px;
       color: white;
-      font-size: 17px;
+      font-size: 18px;
       cursor: pointer;
     }
 
@@ -104,7 +107,7 @@
   <div id="rotate-warning">
     <h2>📱 Rotate Your Phone</h2>
     <p style="margin-top:10px;color:#aaa">
-      Behtar experience ke liye phone horizontal karein.
+      Please rotate your phone horizontally.
     </p>
   </div>
 
@@ -120,7 +123,12 @@
     </button>
   </div>
 
-  <iframe id="main-frame" title="Main App"></iframe>
+  <iframe
+    id="main-frame"
+    title="Main App"
+    allow="fullscreen"
+    allowfullscreen>
+  </iframe>
 
   <script>
     let deferredPrompt = null;
@@ -130,7 +138,7 @@
     const overlay = document.getElementById("start-overlay");
     const frame = document.getElementById("main-frame");
 
-    // Detect installed app
+    // Check installed app
     function isInstalled() {
       return window.matchMedia("(display-mode: standalone)").matches ||
              window.matchMedia("(display-mode: fullscreen)").matches ||
@@ -142,13 +150,13 @@
     }
 
     // PWA install event
-    window.addEventListener("beforeinstallprompt", (event) => {
+    window.addEventListener("beforeinstallprompt", event => {
       event.preventDefault();
       deferredPrompt = event;
       installBtn.style.display = "block";
     });
 
-    // Install app
+    // Install PWA
     async function installPWA() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
@@ -162,10 +170,11 @@
         deferredPrompt = null;
       } else {
         alert(
-          "Install karne ke liye:\n\n" +
-          "Android Chrome: 3 dots > Install app\n\n" +
-          "iPhone Safari: Share > Add to Home Screen\n\n" +
-          "Agar option nahi aa raha hai to HTTPS aur PWA configuration check karein."
+          "Android Chrome:\n" +
+          "3 dots > Install app\n\n" +
+          "iPhone Safari:\n" +
+          "Share > Add to Home Screen\n\n" +
+          "Make sure website is running on HTTPS."
         );
       }
     }
@@ -175,11 +184,9 @@
       deferredPrompt = null;
     });
 
-    // Launch app
+    // Launch app in fullscreen
     async function launchApp() {
       launched = true;
-
-      history.pushState({ page: "landscape" }, "", "#landscape");
 
       document.body.classList.add("in-landscape-mode");
 
@@ -188,26 +195,28 @@
       frame.src = "./app.html";
       frame.style.display = "block";
 
-      // Fullscreen
+      // Request fullscreen from user click
       try {
-        if (document.documentElement.requestFullscreen) {
+        if (!document.fullscreenElement &&
+            document.documentElement.requestFullscreen) {
           await document.documentElement.requestFullscreen();
         }
       } catch (error) {
-        console.log("Fullscreen not supported:", error);
+        console.log("Fullscreen unavailable:", error);
       }
 
-      // Landscape lock
+      // Lock landscape
       try {
-        if (screen.orientation && screen.orientation.lock) {
+        if (screen.orientation &&
+            screen.orientation.lock) {
           await screen.orientation.lock("landscape");
         }
       } catch (error) {
-        console.log("Orientation lock not supported:", error);
+        console.log("Orientation lock unavailable:", error);
       }
     }
 
-    // Return to welcome screen
+    // Back to welcome screen
     function showWelcomeScreen() {
       launched = false;
 
@@ -222,11 +231,8 @@
       }
     }
 
-    window.addEventListener("popstate", () => {
-      showWelcomeScreen();
-    });
+    window.addEventListener("popstate", showWelcomeScreen);
 
-    // Only exit when the app was actually launched
     document.addEventListener("fullscreenchange", () => {
       if (launched && !document.fullscreenElement) {
         showWelcomeScreen();
@@ -238,7 +244,7 @@
       window.addEventListener("load", async () => {
         try {
           await navigator.serviceWorker.register("./sw.js");
-          console.log("Service Worker Registered");
+          console.log("Service Worker Registered!");
         } catch (error) {
           console.error("Service Worker Error:", error);
         }
