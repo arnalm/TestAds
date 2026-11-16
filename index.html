@@ -54,7 +54,7 @@
     }
 
     #install-btn {
-      display: block !important;
+      display: block;
       padding: 15px 30px;
       font-size: 18px;
       background-color: #2e7d32;
@@ -115,16 +115,20 @@
     <button id="install-btn" onclick="installPWA()">📲 Install App</button>
   </div>
 
+  <!-- Yahan aapka app.html khulega -->
   <iframe id="main-frame" frameborder="0"></iframe>
 
   <script>
+    // 1. Service Worker Register
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js');
       });
     }
 
+    // 2. Install Popup Logic
     let deferredPrompt;
+    const installBtn = document.getElementById('install-btn');
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -137,10 +141,16 @@
         const { outcome } = await deferredPrompt.userChoice;
         deferredPrompt = null;
       } else {
-        alert("Install karne ke liye:\n\n• Android Chrome: Upar right side mein 3 dots (⋮) par click karein aur 'Add to Home screen' ya 'Install app' par tap karein.\n\n• iPhone Safari: Neeche Share button (⬆️) dabayein aur 'Add to Home Screen' chunein.");
+        alert("App install karne ke liye:\n\n• Android Chrome: Upar 3 dots (⋮) par click karein aur 'Install app' ya 'Add to Home screen' chunein.\n\n• iPhone Safari: Neeche Share button (⬆️) dabayein aur 'Add to Home Screen' chunein.");
       }
     }
 
+    // Agar app pehle se install hokar khula hai toh Install button chhupa dein
+    if (window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia('(display-mode: standalone)').matches) {
+      installBtn.style.display = 'none';
+    }
+
+    // 3. Landscape Fullscreen Logic
     function launchLandscapeFullscreen() {
       const elem = document.documentElement;
       const overlay = document.getElementById('start-overlay');
@@ -150,7 +160,7 @@
       document.body.classList.add('in-landscape-mode');
 
       overlay.style.display = 'none';
-      frame.src = "index.html"; 
+      frame.src = "app.html"; 
       frame.style.display = 'block';
 
       if (elem.requestFullscreen) {
