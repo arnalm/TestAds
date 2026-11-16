@@ -188,35 +188,27 @@ html, body {
 
     // Launch app in fullscreen
     async function launchApp() {
-      launched = true;
+  const overlay = document.getElementById("start-overlay");
+  const frame = document.getElementById("main-frame");
 
-      document.body.classList.add("in-landscape-mode");
+  overlay.style.display = "none";
+  frame.src = "./app.html";
+  frame.style.display = "block";
 
-      overlay.style.display = "none";
-
-      frame.src = "./app.html";
-      frame.style.display = "block";
-
-      // Request fullscreen from user click
-      try {
-        if (!document.fullscreenElement &&
-            document.documentElement.requestFullscreen) {
-          await document.documentElement.requestFullscreen();
-        }
-      } catch (error) {
-        console.log("Fullscreen unavailable:", error);
-      }
-
-      // Lock landscape
-      try {
-        if (screen.orientation &&
-            screen.orientation.lock) {
-          await screen.orientation.lock("landscape");
-        }
-      } catch (error) {
-        console.log("Orientation lock unavailable:", error);
-      }
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
     }
+  } catch (e) {
+    console.log(e);
+  }
+
+  try {
+    await screen.orientation.lock("landscape");
+  } catch (e) {
+    console.log(e);
+  }
+}
 
     // Back to welcome screen
     function showWelcomeScreen() {
