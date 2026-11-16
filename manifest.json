@@ -1,7 +1,7 @@
 {
   "name": "My Landscape App",
   "short_name": "LandscapeApp",
-  "start_url": "launcher.html",
+  "start_url": "index.html",
   "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#000000",
