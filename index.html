@@ -1,108 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="monetag" content="57319cfb29ee4568a8069865cf1c18ed">
-    <meta charset="UTF-8">
-    <script>(function(s){s.dataset.zone='12208591',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PWA Android Install Demo</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2196F3">
-    
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            text-align: center;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            max-width: 400px;
-            width: 90%;
-        }
-        h1 { color: #333; font-size: 24px; margin-bottom: 10px; }
-        p { color: #666; font-size: 16px; line-height: 1.5; }
-        .install-btn {
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            display: none;
-            margin: 20px auto 0 auto;
-            transition: background 0.3s;
-            box-shadow: 0 2px 5px rgba(33, 150, 243, 0.4);
-        }
-        .install-btn:hover { background-color: #1976D2; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Landscape Fullscreen PWA</title>
+  
+  <!-- PWA Manifest Link -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff5722">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: sans-serif;
+      background-color: #000;
+    }
+
+    /* Welcome Overlay */
+    #start-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #111;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .landscape-btn {
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #ff5722;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    /* Custom Install App Button (Shuru mein chhupa rahega) */
+    #install-btn {
+      display: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    #main-frame {
+      display: none;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* iOS / Portrait Fallback Warning */
+    #rotate-warning {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      color: #fff;
+      z-index: 10000;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    @media screen and (orientation: portrait) {
+      body.in-landscape-mode #rotate-warning {
+        display: flex;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    
-    <h1>Welcome to My PWA<br>
-        <h4>HEY ARNAL how are you</h4>
-    </h1>
-    
-    <p>This website is optimized for Android. You can install it on your home screen just like a regular mobile app!</p>
-    
-    <!-- Android Install Button -->
-    <button id="androidInstallBtn" class="install-btn">Install App</button>
-</div>
+  <!-- iPhone/Portrait Fallback Message -->
+  <div id="rotate-warning">
+    <h2>📱 Please Rotate Your Phone</h2>
+    <p style="margin-top: 10px; color: #aaa;">Behtar experience ke liye apna phone horizontal (landscape) ghumayein.</p>
+  </div>
 
-<script>
-    // Register Service Worker
+  <!-- Welcome Screen -->
+  <div id="start-overlay">
+    <h2>Welcome to My App</h2>
+    <button class="landscape-btn" onclick="launchLandscapeFullscreen()">Start in Landscape</button>
+    
+    <!-- Custom Install Button -->
+    <button id="install-btn">📲 Install App</button>
+  </div>
+
+  <!-- Aapka main content page -->
+  <iframe id="main-frame"></iframe>
+
+  <script>
+    // 1. Service Worker Register karein
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker Registered successfully.'))
-                .catch(err => console.error('Service Worker registration failed:', err));
-        });
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered'))
+          .catch(err => console.log('Service Worker error:', err));
+      });
     }
 
-    // Android Install Prompt Logic
+    // 2. Custom Install Button Logic
     let deferredPrompt;
-    const installBtn = document.getElementById('androidInstallBtn');
+    const installBtn = document.getElementById('install-btn');
 
     window.addEventListener('beforeinstallprompt', (e) => {
-        // Prevent Chrome 67 and earlier from automatically showing the prompt
-        e.preventDefault();
-        // Stash the event so it can be triggered later.
-        deferredPrompt = e;
-        // Update UI to notify the user they can install the PWA
-        installBtn.style.display = 'block';
+      // Browser ke default mini-infobar ko rokein
+      e.preventDefault();
+      // Event ko save karein taaki button click par use kar sakein
+      deferredPrompt = e;
+      // Install button ko screen par dikhayein
+      installBtn.style.display = 'block';
     });
 
     installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        // Show the install prompt
+      if (deferredPrompt) {
+        // Install prompt dikhayein
         deferredPrompt.prompt();
-        // Wait for the user to respond to the prompt
+        // User ka faisla (Accept/Dismiss) check karein
         const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response to the install prompt: ${outcome}`);
-        // We've used the prompt, so we can't use it again
+        if (outcome === 'accepted') {
+          console.log('User ne app install kar liya');
+        }
         deferredPrompt = null;
-        // Hide the install button
         installBtn.style.display = 'none';
+      }
     });
 
-    window.addEventListener('appinstalled', (evt) => {
-        console.log('PWA was successfully installed on Android device!');
+    // Jab app install ho jaye toh button chhupa dein
+    window.addEventListener('appinstalled', () => {
+      installBtn.style.display = 'none';
+      deferredPrompt = null;
     });
-</script>
+
+    // 3. Landscape Fullscreen Logic
+    function launchLandscapeFullscreen() {
+      const elem = document.documentElement;
+      const overlay = document.getElementById('start-overlay');
+      const frame = document.getElementById('main-frame');
+
+      history.pushState({ page: "landscape" }, "", "#landscape");
+      document.body.classList.add('in-landscape-mode');
+
+      overlay.style.display = 'none';
+      frame.src = "index.html"; 
+      frame.style.display = 'block';
+
+      requestFullAndLock(elem);
+    }
+
+    function requestFullAndLock(elem) {
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen().then(() => {
+          lockLandscape();
+        }).catch((err) => {
+          console.log("Fullscreen error:", err);
+        });
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+        lockLandscape();
+      }
+    }
+
+    function lockLandscape() {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock("landscape").catch((err) => {
+          console.log("Orientation lock supported nahi hai:", err);
+        });
+      }
+    }
+
+    function showWelcomeScreen() {
+      const overlay = document.getElementById('start-overlay');
+      const frame = document.getElementById('main-frame');
+
+      document.body.classList.remove('in-landscape-mode');
+      overlay.style.display = 'flex';
+      frame.style.display = 'none';
+      frame.src = "about:blank";
+
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    window.addEventListener("popstate", () => {
+      showWelcomeScreen();
+    });
+
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        showWelcomeScreen();
+      }
+    });
+  </script>
 
 </body>
 </html>
