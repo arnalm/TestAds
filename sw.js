@@ -2,7 +2,6 @@ const CACHE_NAME = 'landscape-pwa-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './launcher.html',
   './manifest.json'
 ];
 
