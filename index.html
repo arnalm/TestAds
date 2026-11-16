@@ -1,13 +1,17 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
-  <title>My Fullscreen PWA</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-  <meta name="theme-color" content="#ff5722">
+  <title>My Fullscreen App</title>
+
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="My App">
@@ -16,29 +20,24 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #000;
-  border: none;
-  outline: none;
-}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-#main-frame {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-  outline: none;
-}
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: #000;
+      border: none;
+      outline: none;
+      font-family: Arial, sans-serif;
+    }
 
     #start-overlay {
       position: fixed;
@@ -51,9 +50,8 @@ html, body {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      text-align: center;
       z-index: 9999;
-      padding: 20px;
+      text-align: center;
     }
 
     button {
@@ -76,7 +74,17 @@ html, body {
       background: #2e7d32;
     }
 
-
+    #main-frame {
+      display: none;
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      border: 0;
+      outline: none;
+      background: #000;
+    }
 
     #rotate-warning {
       display: none;
@@ -92,15 +100,12 @@ html, body {
       padding: 20px;
     }
 
-    body.in-landscape-mode #rotate-warning {
-      display: none;
-    }
-
     @media (orientation: portrait) {
       body.in-landscape-mode #rotate-warning {
         display: flex;
       }
     }
+
   </style>
 </head>
 
@@ -114,136 +119,185 @@ html, body {
   </div>
 
   <div id="start-overlay">
+
     <h2>Welcome to My App</h2>
 
     <button id="start-btn" onclick="launchApp()">
-      Start in Landscape
+      Start App
     </button>
 
     <button id="install-btn" onclick="installPWA()">
       📲 Install App
     </button>
+
   </div>
 
   <iframe
     id="main-frame"
-    title="Main App"
+    title="My App"
     allow="fullscreen"
     allowfullscreen>
   </iframe>
 
   <script>
-    let deferredPrompt = null;
-    let launched = false;
 
-    const installBtn = document.getElementById("install-btn");
+    let deferredPrompt = null;
+
     const overlay = document.getElementById("start-overlay");
     const frame = document.getElementById("main-frame");
+    const installBtn = document.getElementById("install-btn");
 
-    // Check installed app
-    function isInstalled() {
-      return window.matchMedia("(display-mode: standalone)").matches ||
-             window.matchMedia("(display-mode: fullscreen)").matches ||
-             window.navigator.standalone === true;
+    // Check installed PWA
+    function isInstalledPWA() {
+
+      return (
+        window.matchMedia("(display-mode: fullscreen)").matches ||
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true
+      );
+
     }
 
-    if (isInstalled()) {
-      installBtn.style.display = "none";
+    // Open actual app
+    async function openApp() {
+
+      document.body.classList.add("in-landscape-mode");
+
+      overlay.style.display = "none";
+
+      frame.src = "./app.html";
+      frame.style.display = "block";
+
+      // Lock landscape where supported
+      try {
+
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock("landscape");
+        }
+
+      } catch (error) {
+
+        console.log("Landscape lock unavailable");
+
+      }
+
     }
 
-    // PWA install event
-    window.addEventListener("beforeinstallprompt", event => {
-      event.preventDefault();
-      deferredPrompt = event;
-      installBtn.style.display = "block";
+    // Launch from welcome screen
+    async function launchApp() {
+
+      try {
+
+        if (!document.fullscreenElement &&
+            document.documentElement.requestFullscreen) {
+
+          await document.documentElement.requestFullscreen();
+
+        }
+
+      } catch (error) {
+
+        console.log("Browser fullscreen unavailable");
+
+      }
+
+      await openApp();
+
+    }
+
+    // Automatically open app when installed PWA launches
+    window.addEventListener("load", () => {
+
+      if (isInstalledPWA()) {
+
+        installBtn.style.display = "none";
+
+        openApp();
+
+      }
+
     });
 
-    // Install PWA
+    // Installation prompt
+    window.addEventListener("beforeinstallprompt", (event) => {
+
+      event.preventDefault();
+
+      deferredPrompt = event;
+
+      installBtn.style.display = "block";
+
+    });
+
     async function installPWA() {
+
       if (deferredPrompt) {
+
         deferredPrompt.prompt();
 
         const result = await deferredPrompt.userChoice;
 
         if (result.outcome === "accepted") {
+
           installBtn.style.display = "none";
+
         }
 
         deferredPrompt = null;
+
       } else {
+
         alert(
-          "Android Chrome:\n" +
-          "3 dots > Install app\n\n" +
-          "iPhone Safari:\n" +
-          "Share > Add to Home Screen\n\n" +
-          "Make sure website is running on HTTPS."
+          "Android Chrome: 3 dots > Install app\n\n" +
+          "iPhone Safari: Share > Add to Home Screen"
         );
+
       }
+
     }
 
     window.addEventListener("appinstalled", () => {
+
       installBtn.style.display = "none";
+
       deferredPrompt = null;
+
     });
 
-    // Launch app in fullscreen
-    async function launchApp() {
-  const overlay = document.getElementById("start-overlay");
-  const frame = document.getElementById("main-frame");
-
-  overlay.style.display = "none";
-  frame.src = "./app.html";
-  frame.style.display = "block";
-
-  try {
-    if (!document.fullscreenElement) {
-      await document.documentElement.requestFullscreen();
-    }
-  } catch (e) {
-    console.log(e);
-  }
-
-  try {
-    await screen.orientation.lock("landscape");
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-    // Back to welcome screen
-    function showWelcomeScreen() {
-      launched = false;
+    // Back button
+    window.addEventListener("popstate", () => {
 
       document.body.classList.remove("in-landscape-mode");
 
       overlay.style.display = "flex";
+
       frame.style.display = "none";
+
       frame.src = "about:blank";
 
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {});
-      }
-    }
-
-    window.addEventListener("popstate", showWelcomeScreen);
-
-    document.addEventListener("fullscreenchange", () => {
-      if (launched && !document.fullscreenElement) {
-        showWelcomeScreen();
-      }
     });
 
-    // Register service worker
+    // Service Worker
     if ("serviceWorker" in navigator) {
+
       window.addEventListener("load", async () => {
+
         try {
+
           await navigator.serviceWorker.register("./sw.js");
-          console.log("Service Worker Registered!");
+
+          console.log("Service Worker Registered");
+
         } catch (error) {
+
           console.error("Service Worker Error:", error);
+
         }
+
       });
+
     }
+
   </script>
 
 </body>
