@@ -1,20 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>TIME & TEL</title>
-
   <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="TIME & TEL">
-
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
@@ -23,14 +17,22 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      outline: none;
     }
-html, body {
+
+    html, body {
       width: 100%;
       height: 100%;
       height: 100dvh;
       overflow: hidden;
       background: #000;
+      margin: 0;
+      padding: 0;
+      border: 0;
       font-family: Arial, sans-serif;
+      visibility: hidden; /* PWA flash rokne ke liye shuru mein hidden rahega */
     }
 
     #start-overlay {
@@ -74,6 +76,7 @@ html, body {
       font-size: 17px;
       font-weight: bold;
       cursor: pointer;
+      outline: none;
     }
 
     button:active {
@@ -171,7 +174,8 @@ html, body {
       width: 100%;
       height: 100%;
       height: 100dvh;
-      border: 0;
+      border: none;
+      outline: none;
       background: #000;
     }
 
@@ -197,7 +201,7 @@ html, body {
   </style>
 
   <script>
-    // 🔑 Agar app installed hai (PWA mode), toh index.html ko load hone hi mat do, seedha app.html par bhej do
+    // 🔑 Agar app installed hai (Standalone PWA mode), toh turant app.html par bhej do
     function isInstalledPWA() {
       return (
         window.matchMedia("(display-mode: fullscreen)").matches ||
@@ -341,19 +345,22 @@ html, body {
       closeShareModal();
     }
     
-    // Open actual app inside iframe (Sirf Website ke liye)
+    // Open actual app inside iframe (Website mode)
     async function openApp() {
       document.body.classList.add("in-landscape-mode");
-      overlay.style.display = "none";
-      frame.src = "./app.html";
-      frame.style.display = "block";
+      if (overlay) overlay.style.display = "none";
+      if (frame) {
+        frame.src = "./app.html";
+        frame.style.display = "block";
+      }
       
-      // History push sirf website mode ke liye taaki back button se welcome screen par aa sakein
-      history.pushState({ page: "game" }, "", "");
+      if (!isInstalledPWA()) {
+        history.pushState({ page: "game" }, "", "");
+      }
       
       try {
         if (screen.orientation && screen.orientation.lock) {
-          await screen.orientation.lock("landscape");
+          screen.orientation.lock("landscape").catch(() => {});
         }
       } catch (error) {
         console.log("Landscape lock unavailable");
@@ -363,15 +370,16 @@ html, body {
     // Launch from welcome screen (Website mode)
     async function launchApp() {
       try {
-        if (!document.fullscreenElement &&
-          document.documentElement.requestFullscreen) {
-          await document.documentElement.requestFullscreen();
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch((err) => {
+            console.log("Fullscreen error:", err);
+          });
         }
       } catch (error) {
         console.log("Browser fullscreen unavailable");
       }
       
-      await openApp();
+      openApp();
     }
     
     // Installation prompt: Sirf website par dikhega jab app install nahi hogi
@@ -409,9 +417,11 @@ html, body {
     window.addEventListener("popstate", () => {
       if (!isInstalledPWA()) {
         document.body.classList.remove("in-landscape-mode");
-        overlay.style.display = "flex";
-        frame.style.display = "none";
-        frame.src = "about:blank";
+        if (overlay) overlay.style.display = "flex";
+        if (frame) {
+          frame.style.display = "none";
+          frame.src = "about:blank";
+        }
       }
     });
     
