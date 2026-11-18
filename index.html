@@ -2,522 +2,477 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
-  <title>TIME & TEL</title>
+<title>TIME & TEL</title>
 
-  <meta name="theme-color" content="#000000">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="TIME & TEL">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 
-  <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
-      outline: none;
-      touch-action: manipulation;
-    }
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: gray;
-      font-family: Arial, sans-serif;
-      visibility: hidden;
-      touch-action: none;
-      overscroll-behavior: none;
-    }
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #111827;
+  font-family: Arial, sans-serif;
+}
 
-    #start-overlay {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at top, #374151, #111827 70%);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      text-align: center;
-      padding: 20px;
-    }
+#start-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, #374151, #111827 70%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  z-index: 10;
+}
 
-    .logo {
-      font-size: 65px;
-      margin-bottom: 12px;
-    }
+.logo {
+  font-size: 65px;
+  margin-bottom: 12px;
+}
 
-    h1 {
-      color: #fbbf24;
-      font-size: 38px;
-      margin-bottom: 12px;
-    }
+h1 {
+  color: #fbbf24;
+  font-size: 38px;
+  margin-bottom: 12px;
+}
 
-    .subtitle {
-      color: #d1d5db;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
+.subtitle {
+  color: #d1d5db;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
 
-    button {
-      width: 240px;
-      max-width: 90%;
-      padding: 14px;
-      margin-top: 12px;
-      border: none;
-      border-radius: 10px;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
+button {
+  width: 240px;
+  max-width: 90%;
+  padding: 14px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: bold;
+}
 
-    button:active {
-      transform: scale(.96);
-    }
+#start-btn {
+  background: #fbbf24;
+  color: #111827;
+}
 
-    #start-btn {
-      background: #fbbf24;
-      color: #111827;
-    }
+#install-btn {
+  background: #16a34a;
+  color: white;
+  display: none;
+}
 
-    #install-btn {
-      background: #16a34a;
-      color: white;
-      display: none;
-    }
+.secondary {
+  background: #374151;
+  color: white;
+  border: 1px solid #6b7280;
+}
 
-    .secondary {
-      background: #374151;
-      color: white;
-      border: 1px solid #6b7280;
-    }
+#main-frame {
+  display: none;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  border: none;
+  background: #000;
+}
 
-    #share-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.78);
-      z-index: 10002;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
+#share-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.8);
+  z-index: 20;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
 
-    .share-box {
-      background: #1f2937;
-      border: 1px solid #4b5563;
-      border-radius: 16px;
-      padding: 22px;
-      width: 100%;
-      max-width: 320px;
-      text-align: center;
-      color: white;
-      box-shadow: 0 10px 25px rgba(0,0,0,.5);
-    }
+.share-box {
+  background: #1f2937;
+  border: 1px solid #4b5563;
+  border-radius: 16px;
+  padding: 22px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  color: white;
+}
 
-    .share-box h3 {
-      color: #fbbf24;
-      margin-bottom: 16px;
-      font-size: 20px;
-    }
+.share-box h3 {
+  color: #fbbf24;
+  margin-bottom: 16px;
+}
 
-    .share-options {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
+.share-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
 
-    .share-opt-btn {
-      width: 100%;
-      max-width: none;
-      margin-top: 0;
-      padding: 12px 8px;
-      font-size: 14px;
-      border-radius: 10px;
-      color: white;
-    }
+.share-opt-btn {
+  width: 100%;
+  margin: 0;
+  padding: 12px 5px;
+  color: white;
+  font-size: 14px;
+}
 
-    .btn-wa { background: #25D366; color: #0b141a; }
-    .btn-fb { background: #1877F2; }
-    .btn-ig { background: linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
-    .btn-other { background: #4b5563; }
+.btn-wa { background: #25D366; color: #111; }
+.btn-fb { background: #1877F2; }
+.btn-ig { background: #dc2743; }
+.btn-other { background: #4b5563; }
 
-    .close-share-btn {
-      width: 100%;
-      max-width: none;
-      padding: 10px;
-      margin-top: 4px;
-      background: transparent;
-      border: 1px solid #6b7280;
-      color: #d1d5db;
-      font-size: 14px;
-    }
-
-    #main-frame {
-      display: none;
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      border: none;
-      background: #000;
-    }
-  </style>
-
-  <script>
-    let lastTouchEnd = 0;
-
-    document.addEventListener("touchend", function(event) {
-      const now = Date.now();
-
-      if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-      }
-
-      lastTouchEnd = now;
-    }, { passive: false });
-
-    document.addEventListener("gesturestart", function(event) {
-      event.preventDefault();
-    }, { passive: false });
-
-    document.addEventListener("dblclick", function(event) {
-      event.preventDefault();
-    }, { passive: false });
-
-    function isInstalledPWA() {
-      return (
-        window.matchMedia("(display-mode: fullscreen)").matches ||
-        window.matchMedia("(display-mode: standalone)").matches ||
-        window.navigator.standalone === true
-      );
-    }
-
-    if (isInstalledPWA()) {
-      window.location.replace("./app.html");
-    }
-  </script>
+.close-share-btn {
+  width: 100%;
+  background: transparent;
+  color: white;
+  border: 1px solid #6b7280;
+  margin-top: 15px;
+}
+</style>
 </head>
 
 <body>
 
-  <div id="start-overlay">
+<div id="start-overlay">
 
-    <div class="logo">🚚⛽</div>
+  <div class="logo">🚚⛽</div>
 
-    <h1>TIME & TEL</h1>
+  <h1>TIME & TEL</h1>
 
-    <p class="subtitle">
-      Welcome to Time & Tel Game!<br>
-      Ready to Play?
-    </p>
+  <p class="subtitle">
+    Welcome to Time & Tel Game!<br>
+    Ready to Play?
+  </p>
 
-    <button id="start-btn" onclick="launchApp()">
-      ▶ Play Now
-    </button>
+  <button id="start-btn" onclick="launchApp()">
+    ▶ Play Now
+  </button>
 
-    <button id="install-btn" onclick="installPWA()">
-      📲 Install App
-    </button>
+  <button id="install-btn" onclick="installPWA()">
+    📲 Install App
+  </button>
 
-    <button class="secondary" onclick="shareApp()">
-      📤 Share App
-    </button>
+  <button class="secondary" onclick="shareApp()">
+    📤 Share App
+  </button>
 
-  </div>
+</div>
 
-  <div id="share-modal" onclick="closeShareModal()">
+<div id="share-modal" onclick="closeShareModal()">
 
-    <div class="share-box" onclick="event.stopPropagation()">
+  <div class="share-box" onclick="event.stopPropagation()">
 
-      <h3>📤 Share Game</h3>
+    <h3>📤 Share Game</h3>
 
-      <div class="share-options">
+    <div class="share-options">
 
-        <button class="share-opt-btn btn-wa"
-          onclick="shareTo('whatsapp')">
-          💬 WhatsApp
-        </button>
+      <button class="share-opt-btn btn-wa"
+        onclick="shareTo('whatsapp')">
+        💬 WhatsApp
+      </button>
 
-        <button class="share-opt-btn btn-fb"
-          onclick="shareTo('facebook')">
-          📘 Facebook
-        </button>
+      <button class="share-opt-btn btn-fb"
+        onclick="shareTo('facebook')">
+        📘 Facebook
+      </button>
 
-        <button class="share-opt-btn btn-ig"
-          onclick="shareTo('instagram')">
-          📸 Instagram
-        </button>
+      <button class="share-opt-btn btn-ig"
+        onclick="shareTo('instagram')">
+        📸 Instagram
+      </button>
 
-        <button class="share-opt-btn btn-other"
-          onclick="shareTo('other')">
-          🔗 Other
-        </button>
-
-      </div>
-
-      <button class="close-share-btn"
-        onclick="closeShareModal()">
-        Cancel
+      <button class="share-opt-btn btn-other"
+        onclick="shareTo('other')">
+        🔗 Other
       </button>
 
     </div>
+
+    <button class="close-share-btn" onclick="closeShareModal()">
+      Cancel
+    </button>
+
   </div>
+</div>
 
-  <iframe
-    id="main-frame"
-    title="TIME & TEL Game"
-    allow="fullscreen"
-    allowfullscreen>
-  </iframe>
+<iframe
+  id="main-frame"
+  title="TIME & TEL Game"
+  allow="fullscreen"
+  allowfullscreen>
+</iframe>
 
-  <script>
-    let deferredPrompt = null;
-    let gameOpen = false;
+<script>
 
-    const overlay = document.getElementById("start-overlay");
-    const frame = document.getElementById("main-frame");
-    const installBtn = document.getElementById("install-btn");
-    const shareModal = document.getElementById("share-modal");
+let deferredPrompt = null;
+let gameOpen = false;
+let backLock = false;
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.body.style.visibility = "visible";
-    });
+const overlay = document.getElementById("start-overlay");
+const frame = document.getElementById("main-frame");
+const installBtn = document.getElementById("install-btn");
+const shareModal = document.getElementById("share-modal");
 
-    function shareApp() {
-      shareModal.style.display = "flex";
+function isInstalledPWA() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.matchMedia("(display-mode: fullscreen)").matches ||
+    window.navigator.standalone === true
+  );
+}
+
+// OPEN GAME
+
+function launchApp() {
+
+  if (gameOpen) return;
+
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen({
+      navigationUI: "hide"
+    }).catch(() => {});
+  }
+
+  overlay.style.display = "none";
+  frame.style.display = "block";
+
+  gameOpen = true;
+  backLock = false;
+
+  // Create one history entry for game
+  history.pushState(
+    { page: "game" },
+    "",
+    location.href
+  );
+
+  frame.src = "./app.html";
+
+  try {
+    if (screen.orientation?.lock) {
+      screen.orientation.lock("landscape").catch(() => {});
+    }
+  } catch(e) {}
+
+}
+
+// RETURN TO HOME
+
+function returnToHome() {
+
+  if (!gameOpen || backLock) return;
+
+  backLock = true;
+  gameOpen = false;
+
+  frame.src = "about:blank";
+  frame.style.display = "none";
+
+  overlay.style.display = "flex";
+
+  try {
+    if (screen.orientation?.unlock) {
+      screen.orientation.unlock();
+    }
+  } catch(e) {}
+
+  // Reset current history entry
+  history.replaceState(
+    { page: "home" },
+    "",
+    location.href
+  );
+
+  backLock = false;
+}
+
+// PHYSICAL AND BROWSER BACK BUTTON
+
+window.addEventListener("popstate", function() {
+
+  if (gameOpen) {
+    returnToHome();
+  }
+
+});
+
+// RECEIVE MESSAGE FROM GAME
+
+window.addEventListener("message", function(event) {
+
+  if (
+    event.origin === location.origin &&
+    event.data === "GO_BACK_TO_HOME"
+  ) {
+    returnToHome();
+  }
+
+});
+
+// SHARE APP
+
+function shareApp() {
+  shareModal.style.display = "flex";
+}
+
+function closeShareModal() {
+  shareModal.style.display = "none";
+}
+
+async function shareTo(platform) {
+
+  const shareTitle = "TIME & TEL Game";
+  const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
+  const shareUrl = location.href;
+  const fullMessage = shareText + " " + shareUrl;
+
+  if (platform === "whatsapp") {
+
+    window.open(
+      "https://api.whatsapp.com/send?text=" +
+      encodeURIComponent(fullMessage),
+      "_blank"
+    );
+
+  } else if (platform === "facebook") {
+
+    window.open(
+      "https://www.facebook.com/sharer/sharer.php?u=" +
+      encodeURIComponent(shareUrl),
+      "_blank"
+    );
+
+  } else if (platform === "instagram") {
+
+    try {
+      await navigator.clipboard.writeText(fullMessage);
+      alert("Link copied! Opening Instagram.");
+    } catch(e) {
+      alert("Share this link:\n" + shareUrl);
     }
 
-    function closeShareModal() {
-      shareModal.style.display = "none";
-    }
+    window.open("https://www.instagram.com/", "_blank");
 
-    async function shareTo(platform) {
+  } else if (platform === "other") {
 
-      const shareTitle = "TIME & TEL Game";
-      const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
-      const shareUrl = window.location.href;
-      const fullMessage = `${shareText} ${shareUrl}`;
-
-      if (platform === "whatsapp") {
-
-        window.open(
-          `https://api.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`,
-          "_blank"
-        );
-
-      } else if (platform === "facebook") {
-
-        window.open(
-          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-          "_blank"
-        );
-
-      } else if (platform === "instagram") {
-
-        try {
-          await navigator.clipboard.writeText(fullMessage);
-          alert("Link copied! Opening Instagram.");
-        } catch (err) {
-          alert("Copy this link:\n" + shareUrl);
-        }
-
-        window.open("https://www.instagram.com/", "_blank");
-
-      } else if (platform === "other") {
-
-        if (navigator.share) {
-          try {
-            await navigator.share({
-              title: shareTitle,
-              text: shareText,
-              url: shareUrl
-            });
-          } catch (err) {
-            console.log("Share cancelled");
-          }
-        } else {
-          try {
-            await navigator.clipboard.writeText(fullMessage);
-            alert("Game link copied!");
-          } catch (err) {
-            alert("Share this link:\n" + shareUrl);
-          }
-        }
-      }
-
-      closeShareModal();
-    }
-
-    function enterFullscreen() {
-
-      const elem = document.documentElement;
-
-      if (!document.fullscreenElement) {
-
-        if (elem.requestFullscreen) {
-          elem.requestFullscreen({
-            navigationUI: "hide"
-          }).catch(() => {});
-        } else if (elem.webkitRequestFullscreen) {
-          elem.webkitRequestFullscreen();
-        }
-      }
-    }
-
-    function openApp() {
-
-      overlay.style.display = "none";
-
-      frame.style.display = "block";
-      frame.src = "./app.html";
-
-      gameOpen = true;
-
-      history.pushState(
-        { page: "game" },
-        "",
-        window.location.href
-      );
+    if (navigator.share) {
 
       try {
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock("landscape").catch(() => {});
-        }
-      } catch (error) {
-        console.log("Landscape lock unavailable");
-      }
-    }
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl
+        });
+      } catch(e) {}
 
-    function launchApp() {
-      enterFullscreen();
-      openApp();
-    }
-
-    // APP.HTML SE WELCOME PAGE PAR RETURN
-
-    function returnToHome() {
-
-      if (!gameOpen) return;
-
-      gameOpen = false;
-
-      frame.style.display = "none";
-      frame.src = "about:blank";
-
-      overlay.style.display = "flex";
+    } else {
 
       try {
-        if (screen.orientation && screen.orientation.unlock) {
-          screen.orientation.unlock();
-        }
-      } catch (error) {}
+        await navigator.clipboard.writeText(fullMessage);
+        alert("Game link copied!");
+      } catch(e) {
+        alert("Share this link:\n" + shareUrl);
+      }
 
     }
+  }
 
-    // Receive message from app.html
+  closeShareModal();
+}
 
-    window.addEventListener("message", function(event) {
+// INSTALL PWA
 
-      if (event.data === "GO_BACK_TO_HOME") {
-        returnToHome();
-      }
+window.addEventListener("beforeinstallprompt", function(event) {
 
-    });
+  event.preventDefault();
+  deferredPrompt = event;
 
-    // Browser back button
+  if (!isInstalledPWA()) {
+    installBtn.style.display = "block";
+  }
 
-    window.addEventListener("popstate", function() {
+});
 
-      if (gameOpen) {
-        returnToHome();
-      }
+async function installPWA() {
 
-    });
+  if (deferredPrompt) {
 
-    // PWA INSTALL
+    deferredPrompt.prompt();
 
-    window.addEventListener("beforeinstallprompt", (event) => {
+    const result = await deferredPrompt.userChoice;
 
-      event.preventDefault();
-
-      deferredPrompt = event;
-
-      if (!isInstalledPWA()) {
-        installBtn.style.display = "block";
-      }
-
-    });
-
-    async function installPWA() {
-
-      if (deferredPrompt) {
-
-        deferredPrompt.prompt();
-
-        const result = await deferredPrompt.userChoice;
-
-        if (result.outcome === "accepted") {
-          installBtn.style.display = "none";
-        }
-
-        deferredPrompt = null;
-
-      } else {
-
-        alert(
-          "Android Chrome: 3 dots > Install app\n\n" +
-          "iPhone Safari: Share > Add to Home Screen"
-        );
-
-      }
-    }
-
-    window.addEventListener("appinstalled", () => {
-
+    if (result.outcome === "accepted") {
       installBtn.style.display = "none";
-      deferredPrompt = null;
-
-    });
-
-    // SERVICE WORKER
-
-    if ("serviceWorker" in navigator) {
-
-      window.addEventListener("load", async () => {
-
-        try {
-
-          await navigator.serviceWorker.register("./sw.js");
-
-          console.log("Service Worker Registered");
-
-        } catch (error) {
-
-          console.error("Service Worker Error:", error);
-
-        }
-
-      });
-
     }
 
-  </script>
+    deferredPrompt = null;
+
+  } else {
+
+    alert(
+      "Android Chrome: 3 dots > Install app\n\n" +
+      "iPhone Safari: Share > Add to Home Screen"
+    );
+
+  }
+}
+
+window.addEventListener("appinstalled", function() {
+  installBtn.style.display = "none";
+  deferredPrompt = null;
+});
+
+// SERVICE WORKER
+
+if ("serviceWorker" in navigator) {
+
+  window.addEventListener("load", async function() {
+
+    try {
+      await navigator.serviceWorker.register("./sw.js");
+      console.log("Service Worker Registered");
+    } catch(e) {
+      console.error("Service Worker Error:", e);
+    }
+
+  });
+
+}
+
+// SHOW PAGE
+
+document.addEventListener("DOMContentLoaded", function() {
+  document.body.style.visibility = "visible";
+});
+
+</script>
 
 </body>
 </html>
