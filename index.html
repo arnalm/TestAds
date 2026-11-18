@@ -374,7 +374,13 @@
     openApp();
   }
 
-  // 🔄 **Auto Fullscreen jab phone rotate (Landscape) ho**
+  // 🔄 **User Touch / Rotate par Fullscreen activate karne ke liye**
+  window.addEventListener("click", async () => {
+    if (frame.style.display === "block" && !document.fullscreenElement) {
+      await requestFullscreen();
+    }
+  });
+
   if (screen.orientation) {
     screen.orientation.addEventListener("change", async () => {
       if (screen.orientation.type.includes("landscape") && frame.style.display === "block") {
@@ -382,7 +388,6 @@
       }
     });
   } else {
-    // Fallback for older browsers using window resize
     window.addEventListener("resize", async () => {
       if (window.innerWidth > window.innerHeight && frame.style.display === "block") {
         await requestFullscreen();
