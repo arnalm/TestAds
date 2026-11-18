@@ -3,24 +3,31 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
 <title>TIME & TEL</title>
 
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TIME & TEL">
 
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
 <style>
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
   user-select: none;
+  outline: none;
   touch-action: manipulation;
 }
 
@@ -30,6 +37,7 @@ html, body {
   overflow: hidden;
   background: #111827;
   font-family: Arial, sans-serif;
+  overscroll-behavior: none;
 }
 
 #start-overlay {
@@ -41,9 +49,9 @@ html, body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  z-index: 9999;
   text-align: center;
   padding: 20px;
-  z-index: 10;
 }
 
 .logo {
@@ -72,6 +80,12 @@ button {
   border-radius: 10px;
   font-size: 17px;
   font-weight: bold;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:active {
+  transform: scale(.96);
 }
 
 #start-btn {
@@ -91,23 +105,12 @@ button {
   border: 1px solid #6b7280;
 }
 
-#main-frame {
-  display: none;
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  height: 100dvh;
-  border: none;
-  background: #000;
-}
-
 #share-modal {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.8);
-  z-index: 20;
+  background: rgba(0,0,0,.78);
+  z-index: 10002;
   justify-content: center;
   align-items: center;
   padding: 20px;
@@ -122,43 +125,112 @@ button {
   max-width: 320px;
   text-align: center;
   color: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,.5);
 }
 
 .share-box h3 {
   color: #fbbf24;
   margin-bottom: 16px;
+  font-size: 20px;
 }
 
 .share-options {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  margin-bottom: 14px;
 }
 
 .share-opt-btn {
   width: 100%;
-  margin: 0;
-  padding: 12px 5px;
-  color: white;
+  max-width: none;
+  margin-top: 0;
+  padding: 12px 8px;
   font-size: 14px;
+  border-radius: 10px;
+  color: white;
 }
 
-.btn-wa { background: #25D366; color: #111; }
-.btn-fb { background: #1877F2; }
-.btn-ig { background: #dc2743; }
-.btn-other { background: #4b5563; }
+.btn-wa {
+  background: #25D366;
+  color: #0b141a;
+}
+
+.btn-fb {
+  background: #1877F2;
+}
+
+.btn-ig {
+  background: linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
+}
+
+.btn-other {
+  background: #4b5563;
+}
 
 .close-share-btn {
   width: 100%;
+  max-width: none;
+  padding: 10px;
+  margin-top: 4px;
   background: transparent;
-  color: white;
   border: 1px solid #6b7280;
-  margin-top: 15px;
+  color: #d1d5db;
+  font-size: 14px;
 }
+
+#main-frame {
+  display: none;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  border: none;
+  background: #000;
+}
+
 </style>
+
+<script>
+
+// Detect installed PWA
+
+function isInstalledPWA() {
+  return (
+    window.matchMedia("(display-mode: fullscreen)").matches ||
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  );
+}
+
+// Prevent double tap zoom
+
+let lastTouchEnd = 0;
+
+document.addEventListener("touchend", function(event) {
+
+  const now = Date.now();
+
+  if (now - lastTouchEnd <= 300) {
+    event.preventDefault();
+  }
+
+  lastTouchEnd = now;
+
+}, { passive: false });
+
+document.addEventListener("gesturestart", function(event) {
+  event.preventDefault();
+}, { passive: false });
+
+</script>
+
 </head>
 
 <body>
+
+<!-- WELCOME SCREEN -->
 
 <div id="start-overlay">
 
@@ -184,6 +256,8 @@ button {
   </button>
 
 </div>
+
+<!-- SHARE MODAL -->
 
 <div id="share-modal" onclick="closeShareModal()">
 
@@ -220,7 +294,10 @@ button {
     </button>
 
   </div>
+
 </div>
+
+<!-- GAME FRAME -->
 
 <iframe
   id="main-frame"
@@ -233,20 +310,13 @@ button {
 
 let deferredPrompt = null;
 let gameOpen = false;
-let backLock = false;
+let returningHome = false;
 
 const overlay = document.getElementById("start-overlay");
 const frame = document.getElementById("main-frame");
 const installBtn = document.getElementById("install-btn");
 const shareModal = document.getElementById("share-modal");
 
-function isInstalledPWA() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.matchMedia("(display-mode: fullscreen)").matches ||
-    window.navigator.standalone === true
-  );
-}
 
 // OPEN GAME
 
@@ -254,76 +324,119 @@ function launchApp() {
 
   if (gameOpen) return;
 
-  if (document.documentElement.requestFullscreen) {
-    document.documentElement.requestFullscreen({
-      navigationUI: "hide"
-    }).catch(() => {});
-  }
+  gameOpen = true;
+  returningHome = false;
 
   overlay.style.display = "none";
+
   frame.style.display = "block";
 
-  gameOpen = true;
-  backLock = false;
+  // Create game history entry
 
-  // Create one history entry for game
   history.pushState(
     { page: "game" },
     "",
     location.href
   );
 
+  // Load game
+
   frame.src = "./app.html";
 
+  // Landscape mode
+
   try {
-    if (screen.orientation?.lock) {
+
+    if (screen.orientation && screen.orientation.lock) {
+
       screen.orientation.lock("landscape").catch(() => {});
+
     }
-  } catch(e) {}
+
+  } catch(error) {}
+
+  // Fullscreen
+
+  const elem = document.documentElement;
+
+  if (!document.fullscreenElement && elem.requestFullscreen) {
+
+    elem.requestFullscreen({
+      navigationUI: "hide"
+    }).catch(() => {});
+
+  }
 
 }
+
 
 // RETURN TO HOME
 
 function returnToHome() {
 
-  if (!gameOpen || backLock) return;
+  if (!gameOpen || returningHome) return;
 
-  backLock = true;
+  returningHome = true;
   gameOpen = false;
+
+  // Close game
 
   frame.src = "about:blank";
   frame.style.display = "none";
 
+  // Show welcome screen
+
   overlay.style.display = "flex";
 
+  // Unlock landscape mode
+
   try {
-    if (screen.orientation?.unlock) {
+
+    if (screen.orientation && screen.orientation.unlock) {
       screen.orientation.unlock();
     }
-  } catch(e) {}
 
-  // Reset current history entry
+  } catch(error) {}
+
+  // Request portrait mode
+
+  try {
+
+    if (screen.orientation && screen.orientation.lock) {
+
+      screen.orientation.lock("portrait").catch(() => {});
+
+    }
+
+  } catch(error) {}
+
+  // Reset history
+
   history.replaceState(
     { page: "home" },
     "",
     location.href
   );
 
-  backLock = false;
+  returningHome = false;
+
 }
 
-// PHYSICAL AND BROWSER BACK BUTTON
+
+// PHYSICAL BACK BUTTON
 
 window.addEventListener("popstate", function() {
 
   if (gameOpen) {
+
     returnToHome();
+
   }
 
 });
 
-// RECEIVE MESSAGE FROM GAME
+
+// MESSAGE FROM APP.HTML
 
 window.addEventListener("message", function(event) {
 
@@ -331,27 +444,39 @@ window.addEventListener("message", function(event) {
     event.origin === location.origin &&
     event.data === "GO_BACK_TO_HOME"
   ) {
+
     returnToHome();
+
   }
 
 });
 
+
 // SHARE APP
 
 function shareApp() {
+
   shareModal.style.display = "flex";
+
 }
 
 function closeShareModal() {
+
   shareModal.style.display = "none";
+
 }
+
 
 async function shareTo(platform) {
 
   const shareTitle = "TIME & TEL Game";
+
   const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
+
   const shareUrl = location.href;
+
   const fullMessage = shareText + " " + shareUrl;
+
 
   if (platform === "whatsapp") {
 
@@ -361,7 +486,9 @@ async function shareTo(platform) {
       "_blank"
     );
 
-  } else if (platform === "facebook") {
+  }
+
+  else if (platform === "facebook") {
 
     window.open(
       "https://www.facebook.com/sharer/sharer.php?u=" +
@@ -369,56 +496,81 @@ async function shareTo(platform) {
       "_blank"
     );
 
-  } else if (platform === "instagram") {
+  }
+
+  else if (platform === "instagram") {
 
     try {
+
       await navigator.clipboard.writeText(fullMessage);
+
       alert("Link copied! Opening Instagram.");
-    } catch(e) {
-      alert("Share this link:\n" + shareUrl);
+
+    } catch(error) {
+
+      alert("Copy this link:\n" + shareUrl);
+
     }
 
     window.open("https://www.instagram.com/", "_blank");
 
-  } else if (platform === "other") {
+  }
+
+  else if (platform === "other") {
 
     if (navigator.share) {
 
       try {
+
         await navigator.share({
           title: shareTitle,
           text: shareText,
           url: shareUrl
         });
-      } catch(e) {}
 
-    } else {
+      } catch(error) {}
+
+    }
+
+    else {
 
       try {
+
         await navigator.clipboard.writeText(fullMessage);
+
         alert("Game link copied!");
-      } catch(e) {
+
+      } catch(error) {
+
         alert("Share this link:\n" + shareUrl);
+
       }
 
     }
+
   }
 
   closeShareModal();
+
 }
+
 
 // INSTALL PWA
 
 window.addEventListener("beforeinstallprompt", function(event) {
 
   event.preventDefault();
+
   deferredPrompt = event;
 
   if (!isInstalledPWA()) {
+
     installBtn.style.display = "block";
+
   }
 
 });
+
 
 async function installPWA() {
 
@@ -429,12 +581,16 @@ async function installPWA() {
     const result = await deferredPrompt.userChoice;
 
     if (result.outcome === "accepted") {
+
       installBtn.style.display = "none";
+
     }
 
     deferredPrompt = null;
 
-  } else {
+  }
+
+  else {
 
     alert(
       "Android Chrome: 3 dots > Install app\n\n" +
@@ -442,12 +598,18 @@ async function installPWA() {
     );
 
   }
+
 }
 
+
 window.addEventListener("appinstalled", function() {
+
   installBtn.style.display = "none";
+
   deferredPrompt = null;
+
 });
+
 
 // SERVICE WORKER
 
@@ -456,21 +618,22 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", async function() {
 
     try {
+
       await navigator.serviceWorker.register("./sw.js");
+
       console.log("Service Worker Registered");
-    } catch(e) {
-      console.error("Service Worker Error:", e);
+
+    }
+
+    catch(error) {
+
+      console.error("Service Worker Error:", error);
+
     }
 
   });
 
 }
-
-// SHOW PAGE
-
-document.addEventListener("DOMContentLoaded", function() {
-  document.body.style.visibility = "visible";
-});
 
 </script>
 
