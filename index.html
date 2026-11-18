@@ -89,6 +89,7 @@
     #install-btn {
       background: #16a34a;
       color: white;
+      display: none;
     }
 
     .secondary {
@@ -330,64 +331,23 @@
     );
   }
   
-  // Fullscreen trigger function
-  async function requestFullscreen() {
-    try {
-      const docEl = document.documentElement;
-      if (!document.fullscreenElement) {
-        if (docEl.requestFullscreen) {
-          await docEl.requestFullscreen();
-        } else if (docEl.webkitRequestFullscreen) {
-          await docEl.webkitRequestFullscreen();
-        }
-      }
-    } catch (error) {
-      console.log("Fullscreen restriction:", error);
-    }
-  }
-
-  // Open actual app function
+  // Open actual app (Normal mode, no fullscreen/orientation lock)
   function openApp() {
-    document.body.classList.add("in-landscape-mode");
     overlay.style.display = "none";
+    frame.src = "./app.html";
+    frame.style.display = "block";
     
-    frame.src = "about:blank";
-    
-    if (window.location.hash !== "#game") {
-      history.pushState({ view: "game" }, "", "#game");
-    }
-    
-    setTimeout(() => {
-      frame.src = "./app.html";
-      frame.style.display = "block";
-    }, 50);
+    history.pushState({ page: "game" }, "", "");
   }
   
   // Launch from welcome screen
-  async function launchApp() {
+  function launchApp() {
     if (isInstalledPWA()) {
       window.location.href = "./app.html";
       return;
     }
     
-    await requestFullscreen();
     openApp();
-  }
-
-  // 🔄 **Auto Fullscreen jab phone rotate (Landscape) ho**
-  if (screen.orientation) {
-    screen.orientation.addEventListener("change", async () => {
-      if (screen.orientation.type.includes("landscape") && frame.style.display === "block") {
-        await requestFullscreen();
-      }
-    });
-  } else {
-    // Fallback for older browsers using window resize
-    window.addEventListener("resize", async () => {
-      if (window.innerWidth > window.innerHeight && frame.style.display === "block") {
-        await requestFullscreen();
-      }
-    });
   }
   
   // Page Load check
@@ -396,9 +356,7 @@
       installBtn.style.display = "none";
       window.location.href = "./app.html";
     } else {
-      if (!window.location.hash || window.location.hash === "#game") {
-        history.replaceState({ view: "home" }, "", "#home");
-      }
+      installBtn.style.display = "none";
     }
   });
   
@@ -432,18 +390,18 @@
     deferredPrompt = null;
   });
   
-  // Back Button Handler
-  window.addEventListener("popstate", (event) => {
+  // Back Button Event: Jaise hi user back dabayega, yeh function overlay (home screen) wapas le aayega
+  window.addEventListener("popstate", () => {
     document.body.classList.remove("in-landscape-mode");
+    overlay.style.display = "flex";
     frame.style.display = "none";
     frame.src = "about:blank";
-    overlay.style.display = "flex";
     
-    if (window.location.hash !== "#home") {
-      history.replaceState({ view: "home" }, "", "#home");
+    if (isInstalledPWA()) {
+      installBtn.style.display = "none";
     }
   });
-
+  
   // Service Worker
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
