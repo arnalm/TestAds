@@ -13,7 +13,6 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
-    /* ✅ Fixed: '-' ki jagah '*' lagaya gaya hai taaki sabhi elements par zoom block kaam kare */
     * {
       margin: 0;
       padding: 0;
@@ -23,7 +22,7 @@
       -webkit-user-select: none;
       user-select: none;
       outline: none;
-      touch-action: manipulation; /* Double-tap zoom rokne ke liye */
+      touch-action: manipulation;
     }
 
     html, body {
@@ -36,7 +35,7 @@
       border: 0;
       font-family: Arial, sans-serif;
       visibility: hidden;
-      touch-action: none; /* Screen pan/zoom puri tarah lock */
+      touch-action: none;
       overscroll-behavior: none;
     }
 
@@ -186,7 +185,7 @@
     }
 
     #rotate-warning {
-      display: none;
+      display: none !important;
       position: fixed;
       inset: 0;
       background: black;
@@ -201,13 +200,12 @@
 
     @media (orientation: portrait) {
       body.in-landscape-mode #rotate-warning {
-        display: flex;
+        display: flex !important;
       }
     }
   </style>
 
   <script>
-    // ✅ Double-tap aur Pinch zoom ko JavaScript se bhi block karna
     let lastTouchEnd = 0;
     document.addEventListener("touchend", function (event) {
       const now = Date.now();
@@ -225,7 +223,6 @@
       event.preventDefault();
     }, { passive: false });
 
-    // ✅ PWA Mode Check
     function isInstalledPWA() {
       return (
         window.matchMedia("(display-mode: fullscreen)").matches ||
@@ -234,7 +231,6 @@
       );
     }
 
-    // Agar app installed hai (PWA mode), toh turant app.html par bhej do
     if (isInstalledPWA()) {
       window.location.replace("./app.html");
     }
@@ -250,7 +246,6 @@
     </p>
   </div>
 
-  <!-- Welcome Screen (Sirf Website par dikhega) -->
   <div id="start-overlay">
     <div class="logo">🚚⛽</div>
 
@@ -274,7 +269,6 @@
     </button>
   </div>
 
-  <!-- Share Options Modal -->
   <div id="share-modal" onclick="closeShareModal(event)">
     <div class="share-box" onclick="event.stopPropagation()">
       <h3>📤 Share Game</h3>
@@ -368,7 +362,6 @@
       closeShareModal();
     }
     
-    // Fullscreen helper function
     function enterFullscreen() {
       const elem = document.documentElement;
       if (!document.fullscreenElement) {
@@ -380,8 +373,12 @@
       }
     }
 
-    // Open actual app inside iframe (Website mode)
     async function openApp() {
+      const rotateWarning = document.getElementById("rotate-warning");
+      if (rotateWarning) {
+        rotateWarning.style.display = ""; 
+      }
+
       document.body.classList.add("in-landscape-mode");
       if (overlay) overlay.style.display = "none";
       if (frame) {
@@ -402,7 +399,6 @@
       }
     }
     
-    // Launch from welcome screen (Website mode)
     async function launchApp() {
       enterFullscreen();
       openApp();
@@ -410,7 +406,7 @@
     
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
-      deferredPrompt = event;
+      deferredPrompt = fileEvent = event;
       
       if (!isInstalledPWA() && installBtn) {
         installBtn.style.display = "block";
@@ -441,6 +437,22 @@
     window.addEventListener("popstate", () => {
       if (!isInstalledPWA()) {
         document.body.classList.remove("in-landscape-mode");
+        
+        const rotateWarning = document.getElementById("rotate-warning");
+        if (rotateWarning) {
+          rotateWarning.style.display = "none";
+        }
+
+        try {
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
+        } catch (e) {}
+
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        }
+
         if (overlay) overlay.style.display = "flex";
         if (frame) {
           frame.style.display = "none";
