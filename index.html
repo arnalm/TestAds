@@ -32,6 +32,7 @@
       overflow: hidden;
       background: #000;
       font-family: Arial, sans-serif;
+      visibility: hidden; /* PWA flash rokne ke liye shuru mein hidden rahega */
     }
 
     #start-overlay {
@@ -89,7 +90,7 @@
     #install-btn {
       background: #16a34a;
       color: white;
-      display: none; /* By default hidden rahega */
+      display: none; /* By default hidden */
     }
 
     .secondary {
@@ -196,6 +197,21 @@
       }
     }
   </style>
+
+  <script>
+    // 🔑 Agar app installed hai (PWA mode), toh index.html ko load hone hi mat do, seedha app.html par bhej do
+    function isInstalledPWA() {
+      return (
+        window.matchMedia("(display-mode: fullscreen)").matches ||
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true
+      );
+    }
+
+    if (isInstalledPWA()) {
+      window.location.replace("./app.html");
+    }
+  </script>
 </head>
 
 <body>
@@ -207,7 +223,7 @@
     </p>
   </div>
 
-  <!-- Welcome Screen -->
+  <!-- Welcome Screen (Sirf Website par dikhega) -->
   <div id="start-overlay">
     <div class="logo">🚚⛽</div>
 
@@ -267,6 +283,11 @@
     const frame = document.getElementById("main-frame");
     const installBtn = document.getElementById("install-btn");
     const shareModal = document.getElementById("share-modal");
+
+    // Website mode me body ko visible karein
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.style.visibility = "visible";
+    });
     
     // Share App Modal Functions
     function shareApp() {
@@ -322,22 +343,14 @@
       closeShareModal();
     }
     
-    // Check installed PWA
-    function isInstalledPWA() {
-      return (
-        window.matchMedia("(display-mode: fullscreen)").matches ||
-        window.matchMedia("(display-mode: standalone)").matches ||
-        window.navigator.standalone === true
-      );
-    }
-    
-    // Open actual app
+    // Open actual app inside iframe (Sirf Website ke liye)
     async function openApp() {
       document.body.classList.add("in-landscape-mode");
       overlay.style.display = "none";
       frame.src = "./app.html";
       frame.style.display = "block";
       
+      // History push sirf website mode ke liye taaki back button se welcome screen par aa sakein
       history.pushState({ page: "game" }, "", "");
       
       try {
@@ -349,13 +362,8 @@
       }
     }
     
-    // Launch from welcome screen
+    // Launch from welcome screen (Website mode)
     async function launchApp() {
-      if (isInstalledPWA()) {
-        window.location.href = "./app.html";
-        return;
-      }
-      
       try {
         if (!document.fullscreenElement &&
           document.documentElement.requestFullscreen) {
@@ -368,26 +376,13 @@
       await openApp();
     }
     
-    // Page Load check: Agar app installed hai toh install button ko hide rakho, aur seedha app kholo
-    window.addEventListener("load", () => {
-      if (isInstalledPWA()) {
-        if (installBtn) installBtn.style.display = "none";
-        window.location.href = "./app.html";
-      } else {
-        if (installBtn) installBtn.style.display = "none"; // Jab tak browser install prompt na de, hide rahega
-      }
-    });
-    
-    // Installation prompt: Sirf tabhi dikhega jab app install nahi hogi
+    // Installation prompt: Sirf website par dikhega jab app install nahi hogi
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
       deferredPrompt = event;
       
-      // Strict check: Agar app installed nahi hai, tabhi install button dikhao
-      if (!isInstalledPWA()) {
-        if (installBtn) installBtn.style.display = "block";
-      } else {
-        if (installBtn) installBtn.style.display = "none";
+      if (!isInstalledPWA() && installBtn) {
+        installBtn.style.display = "block";
       }
     });
     
@@ -395,8 +390,8 @@
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const result = await deferredPrompt.userChoice;
-        if (result.outcome === "accepted") {
-          if (installBtn) installBtn.style.display = "none";
+        if (result.outcome === "accepted" && installBtn) {
+          installBtn.style.display = "none";
         }
         deferredPrompt = null;
       } else {
@@ -412,12 +407,14 @@
       deferredPrompt = null;
     });
     
-    // Back Button Event
+    // Back Button Event (Yeh sirf website par iframe se wapas welcome screen par layega)
     window.addEventListener("popstate", () => {
-      document.body.classList.remove("in-landscape-mode");
-      overlay.style.display = "flex";
-      frame.style.display = "none";
-      frame.src = "about:blank";
+      if (!isInstalledPWA()) {
+        document.body.classList.remove("in-landscape-mode");
+        overlay.style.display = "flex";
+        frame.style.display = "none";
+        frame.src = "about:blank";
+      }
     });
     
     // Service Worker
