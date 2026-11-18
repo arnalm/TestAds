@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>TIME & TEL</title>
   <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
@@ -13,15 +13,17 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
+    /* ✅ Fixed: '-' ki jagah '*' lagaya gaya hai taaki sabhi elements par zoom block kaam kare */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
       outline: none;
-      /* 🔑 Double-tap zoom ko rokne ke liye */
-      touch-action: manipulation;
+      touch-action: manipulation; /* Double-tap zoom rokne ke liye */
     }
 
     html, body {
@@ -34,8 +36,9 @@
       padding: 0;
       border: 0;
       font-family: Arial, sans-serif;
-      visibility: hidden; /* PWA flash rokne ke liye shuru mein hidden rahega */
-      touch-action: manipulation;
+      visibility: hidden;
+      touch-action: none; /* Screen pan/zoom puri tarah lock */
+      overscroll-behavior: none;
     }
 
     #start-overlay {
@@ -80,6 +83,7 @@
       font-weight: bold;
       cursor: pointer;
       outline: none;
+      touch-action: manipulation;
     }
 
     button:active {
@@ -94,7 +98,7 @@
     #install-btn {
       background: #16a34a;
       color: white;
-      display: none; /* By default hidden */
+      display: none;
     }
 
     .secondary {
@@ -204,7 +208,25 @@
   </style>
 
   <script>
-    // 🔑 Agar app installed hai (Standalone PWA mode), toh turant app.html par bhej do
+    // ✅ Double-tap aur Pinch zoom ko JavaScript se bhi block karna
+    let lastTouchEnd = 0;
+    document.addEventListener("touchend", function (event) {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, { passive: false });
+
+    document.addEventListener("gesturestart", function (event) {
+      event.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener("dblclick", function (event) {
+      event.preventDefault();
+    }, { passive: false });
+
+    // ✅ PWA Mode Check
     function isInstalledPWA() {
       return (
         window.matchMedia("(display-mode: fullscreen)").matches ||
@@ -213,6 +235,7 @@
       );
     }
 
+    // Agar app installed hai (PWA mode), toh turant app.html par bhej do
     if (isInstalledPWA()) {
       window.location.replace("./app.html");
     }
@@ -289,12 +312,10 @@
     const installBtn = document.getElementById("install-btn");
     const shareModal = document.getElementById("share-modal");
 
-    // Website mode me body ko visible karein
     document.addEventListener("DOMContentLoaded", () => {
       document.body.style.visibility = "visible";
     });
     
-    // Share App Modal Functions
     function shareApp() {
       shareModal.style.display = "flex";
     }
@@ -348,6 +369,18 @@
       closeShareModal();
     }
     
+    // Fullscreen helper function
+    function enterFullscreen() {
+      const elem = document.documentElement;
+      if (!document.fullscreenElement) {
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        }
+      }
+    }
+
     // Open actual app inside iframe (Website mode)
     async function openApp() {
       document.body.classList.add("in-landscape-mode");
@@ -372,20 +405,10 @@
     
     // Launch from welcome screen (Website mode)
     async function launchApp() {
-      try {
-        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen().catch((err) => {
-            console.log("Fullscreen error:", err);
-          });
-        }
-      } catch (error) {
-        console.log("Browser fullscreen unavailable");
-      }
-      
+      enterFullscreen();
       openApp();
     }
     
-    // Installation prompt: Sirf website par dikhega jab app install nahi hogi
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
       deferredPrompt = event;
@@ -416,7 +439,6 @@
       deferredPrompt = null;
     });
     
-    // Back Button Event (Yeh sirf website par iframe se wapas welcome screen par layega)
     window.addEventListener("popstate", () => {
       if (!isInstalledPWA()) {
         document.body.classList.remove("in-landscape-mode");
@@ -428,7 +450,6 @@
       }
     });
     
-    // Service Worker
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", async () => {
         try {
