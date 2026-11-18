@@ -1,7 +1,7 @@
 
 {
   "id": "./",
-  "name": "No internet connection" ,
+  "name": "Welcome to Time & Tel",
   "short_name": "Time & Tel",
   "description": "Fullscreen Landscape Application",
   "start_url": "./app.html",
