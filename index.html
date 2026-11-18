@@ -330,8 +330,8 @@
     );
   }
   
-  // Helper to request fullscreen safely
-  async function triggerFullscreen() {
+  // Fullscreen trigger function
+  async function requestFullscreen() {
     try {
       const docEl = document.documentElement;
       if (!document.fullscreenElement) {
@@ -370,27 +370,25 @@
       return;
     }
     
-    // Fullscreen aur Landscape Lock dono try karo
-    await triggerFullscreen();
-    
-    try {
-      if (screen.orientation && screen.orientation.lock) {
-        await screen.orientation.lock("landscape");
-      }
-    } catch (error) {
-      console.log("Orientation lock restriction:", error);
-    }
-    
+    await requestFullscreen();
     openApp();
   }
 
-  // 🔄 **Auto Fullscreen on Screen Rotate (Landscape)**
-  window.addEventListener("resize", async () => {
-    // Agar mobile landscape mode mein rotate ho gaya hai aur game open hai
-    if (window.innerWidth > window.innerHeight && frame.style.display === "block") {
-      await triggerFullscreen();
-    }
-  });
+  // 🔄 **Auto Fullscreen jab phone rotate (Landscape) ho**
+  if (screen.orientation) {
+    screen.orientation.addEventListener("change", async () => {
+      if (screen.orientation.type.includes("landscape") && frame.style.display === "block") {
+        await requestFullscreen();
+      }
+    });
+  } else {
+    // Fallback for older browsers using window resize
+    window.addEventListener("resize", async () => {
+      if (window.innerWidth > window.innerHeight && frame.style.display === "block") {
+        await requestFullscreen();
+      }
+    });
+  }
   
   // Page Load check
   window.addEventListener("load", () => {
