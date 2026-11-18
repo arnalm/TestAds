@@ -330,18 +330,24 @@
     );
   }
   
-  // Open actual app function
+  // Open actual app function with fresh iframe reset
   function openApp() {
     document.body.classList.add("in-landscape-mode");
     overlay.style.display = "none";
     
-    // Push #game hash to history stack
+    // Purana iframe clean karo taaki andar ki history wipe ho jaye
+    frame.src = "about:blank";
+    
+    // History state push karo
     if (window.location.hash !== "#game") {
       history.pushState({ view: "game" }, "", "#game");
     }
     
-    frame.src = "./app.html";
-    frame.style.display = "block";
+    // Naya fresh app.html load karo
+    setTimeout(() => {
+      frame.src = "./app.html";
+      frame.style.display = "block";
+    }, 50);
   }
   
   // Launch from welcome screen with Fullscreen & Landscape Lock
@@ -382,8 +388,7 @@
       installBtn.style.display = "none";
       window.location.href = "./app.html";
     } else {
-      // Ensure initial hash is #home if not set
-      if (!window.location.hash) {
+      if (!window.location.hash || window.location.hash === "#game") {
         history.replaceState({ view: "home" }, "", "#home");
       }
     }
@@ -419,14 +424,15 @@
     deferredPrompt = null;
   });
   
-  // 🔑 Foolproof Hash-based Back Button Handler
+  // 🔑 100% Foolproof Back Button Handler
   window.addEventListener("popstate", (event) => {
-    // Agar hash #home hai ya empty hai, toh overlay show karo aur game hide karo
-    if (window.location.hash === "#home" || window.location.hash === "") {
-      document.body.classList.remove("in-landscape-mode");
-      frame.style.display = "none";
-      frame.src = "about:blank";
-      overlay.style.display = "flex";
+    document.body.classList.remove("in-landscape-mode");
+    frame.style.display = "none";
+    frame.src = "about:blank"; // Iframe ko turant blank karke history clear karo
+    overlay.style.display = "flex";
+    
+    if (window.location.hash !== "#home") {
+      history.replaceState({ view: "home" }, "", "#home");
     }
   });
 
