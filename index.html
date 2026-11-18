@@ -331,7 +331,7 @@
   }
   
   // Open actual app
-  async function openApp() {
+  function openApp() {
     document.body.classList.add("in-landscape-mode");
     overlay.style.display = "none";
     
@@ -340,33 +340,38 @@
     
     frame.src = "./app.html";
     frame.style.display = "block";
-    
-    try {
-      if (screen.orientation && screen.orientation.lock) {
-        await screen.orientation.lock("landscape");
-      }
-    } catch (error) {
-      console.log("Landscape lock unavailable");
-    }
   }
   
-  // Launch from welcome screen
+  // Launch from welcome screen (Fullscreen + Landscape Lock)
   async function launchApp() {
     if (isInstalledPWA()) {
       window.location.href = "./app.html";
       return;
     }
     
+    // 1. Fullscreen request
     try {
-      if (!document.fullscreenElement &&
-        document.documentElement.requestFullscreen) {
-        await document.documentElement.requestFullscreen();
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen) {
+        await docEl.requestFullscreen();
+      } else if (docEl.webkitRequestFullscreen) {
+        await docEl.webkitRequestFullscreen();
       }
     } catch (error) {
-      console.log("Browser fullscreen unavailable");
+      console.log("Fullscreen request failed or denied:", error);
     }
     
-    await openApp();
+    // 2. Landscape orientation lock
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } catch (error) {
+      console.log("Orientation lock failed or unavailable:", error);
+    }
+    
+    // 3. Open the actual app frame
+    openApp();
   }
   
   // Page Load check
@@ -407,7 +412,7 @@
     deferredPrompt = null;
   });
   
-  // 🔑 Back Button Handler (Mobile/Browser Back)
+  // 🔑 Back Button Handler
   window.addEventListener("popstate", (event) => {
     if (frame.style.display === "block") {
       document.body.classList.remove("in-landscape-mode");
