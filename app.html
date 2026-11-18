@@ -38,16 +38,7 @@
   });
 
 
-   window.addEventListener("popstate", function() {
-  if (window.parent !== window) {
-    window.parent.postMessage(
-      "GO_BACK_TO_HOME",
-      window.location.origin
-    );
-  } else {
-    window.location.replace("./index.html");
-  }
-});
+   
 </script>
 <script type="module">
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
