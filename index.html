@@ -279,7 +279,7 @@
   async function shareTo(platform) {
     const shareTitle = "TIME & TEL Game";
     const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
-    const shareUrl = window.location.href;
+    const shareUrl = window.location.href.split('#')[0];
     const fullMessage = `${shareText} ${shareUrl}`;
     
     if (platform === "whatsapp") {
@@ -335,8 +335,10 @@
     document.body.classList.add("in-landscape-mode");
     overlay.style.display = "none";
     
-    // Har bar game kholne par ek nayi history state push karein taaki back karne par seedha home aaye
-    history.pushState({ view: "game" }, "", "");
+    // Push #game hash to history stack
+    if (window.location.hash !== "#game") {
+      history.pushState({ view: "game" }, "", "#game");
+    }
     
     frame.src = "./app.html";
     frame.style.display = "block";
@@ -379,6 +381,11 @@
     if (isInstalledPWA()) {
       installBtn.style.display = "none";
       window.location.href = "./app.html";
+    } else {
+      // Ensure initial hash is #home if not set
+      if (!window.location.hash) {
+        history.replaceState({ view: "home" }, "", "#home");
+      }
     }
   });
   
@@ -412,19 +419,16 @@
     deferredPrompt = null;
   });
   
-  // 🔑 Fixed Back Button Handler (Ab kitni bhi baar game kholo/band karo, ek baar mein home aayega)
+  // 🔑 Foolproof Hash-based Back Button Handler
   window.addEventListener("popstate", (event) => {
-    document.body.classList.remove("in-landscape-mode");
-    frame.style.display = "none";
-    frame.src = "about:blank";
-    overlay.style.display = "flex";
-    
-    // History state ko wapas home par reset kar dein
-    history.replaceState({ view: "home" }, "", "");
+    // Agar hash #home hai ya empty hai, toh overlay show karo aur game hide karo
+    if (window.location.hash === "#home" || window.location.hash === "") {
+      document.body.classList.remove("in-landscape-mode");
+      frame.style.display = "none";
+      frame.src = "about:blank";
+      overlay.style.display = "flex";
+    }
   });
-  
-  // Initial history state set karein
-  history.replaceState({ view: "home" }, "", "");
 
   // Service Worker
   if ("serviceWorker" in navigator) {
