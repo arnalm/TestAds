@@ -259,164 +259,172 @@
     allowfullscreen>
   </iframe>
 
-  <script>
-    let deferredPrompt = null;
-
-    const overlay = document.getElementById("start-overlay");
-    const frame = document.getElementById("main-frame");
-    const installBtn = document.getElementById("install-btn");
-    const shareModal = document.getElementById("share-modal");
-
-    // Share App Modal Functions
-    function shareApp() {
-      shareModal.style.display = "flex";
+<script>
+  let deferredPrompt = null;
+  
+  const overlay = document.getElementById("start-overlay");
+  const frame = document.getElementById("main-frame");
+  const installBtn = document.getElementById("install-btn");
+  const shareModal = document.getElementById("share-modal");
+  
+  // Share App Modal Functions
+  function shareApp() {
+    shareModal.style.display = "flex";
+  }
+  
+  function closeShareModal() {
+    shareModal.style.display = "none";
+  }
+  
+  async function shareTo(platform) {
+    const shareTitle = "TIME & TEL Game";
+    const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
+    const shareUrl = window.location.href;
+    const fullMessage = `${shareText} ${shareUrl}`;
+    
+    if (platform === "whatsapp") {
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`, "_blank");
     }
-
-    function closeShareModal() {
-      shareModal.style.display = "none";
+    else if (platform === "facebook") {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, "_blank");
     }
-
-    async function shareTo(platform) {
-      const shareTitle = "TIME & TEL Game";
-      const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
-      const shareUrl = window.location.href;
-      const fullMessage = `${shareText} ${shareUrl}`;
-
-      if (platform === "whatsapp") {
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`, "_blank");
-      } 
-      else if (platform === "facebook") {
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, "_blank");
-      } 
-      else if (platform === "instagram") {
-        // Instagram direct URL share support nahi karta, isliye link copy karke Instagram open karega
+    else if (platform === "instagram") {
+      try {
+        await navigator.clipboard.writeText(fullMessage);
+        alert("Link copied! Opening Instagram—paste it in your Story, Bio, or DM.");
+      } catch (err) {
+        alert("Copy this link to share on Instagram:\n" + shareUrl);
+      }
+      window.open("https://www.instagram.com/", "_blank");
+    }
+    else if (platform === "other") {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: shareTitle,
+            text: shareText,
+            url: shareUrl
+          });
+        } catch (err) {
+          console.log("Share cancelled");
+        }
+      } else {
         try {
           await navigator.clipboard.writeText(fullMessage);
-          alert("Link copied! Opening Instagram—paste it in your Story, Bio, or DM.");
+          alert("Game link copied to clipboard!");
         } catch (err) {
-          alert("Copy this link to share on Instagram:\n" + shareUrl);
-        }
-        window.open("https://www.instagram.com/", "_blank");
-      } 
-      else if (platform === "other") {
-        if (navigator.share) {
-          try {
-            await navigator.share({
-              title: shareTitle,
-              text: shareText,
-              url: shareUrl
-            });
-          } catch (err) {
-            console.log("Share cancelled");
-          }
-        } else {
-          try {
-            await navigator.clipboard.writeText(fullMessage);
-            alert("Game link copied to clipboard!");
-          } catch (err) {
-            alert("Share this link:\n" + shareUrl);
-          }
+          alert("Share this link:\n" + shareUrl);
         }
       }
-
-      closeShareModal();
     }
-
-    // Check installed PWA
-    function isInstalledPWA() {
-      return (
-        window.matchMedia("(display-mode: fullscreen)").matches ||
-        window.matchMedia("(display-mode: standalone)").matches ||
-        window.navigator.standalone === true
+    
+    closeShareModal();
+  }
+  
+  // Check installed PWA
+  function isInstalledPWA() {
+    return (
+      window.matchMedia("(display-mode: fullscreen)").matches ||
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true
+    );
+  }
+  
+  // Open actual app (iframe ya direct page)
+  async function openApp() {
+    document.body.classList.add("in-landscape-mode");
+    overlay.style.display = "none";
+    frame.src = "./app.html";
+    frame.style.display = "block";
+    
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } catch (error) {
+      console.log("Landscape lock unavailable");
+    }
+  }
+  
+  // Launch from welcome screen
+  async function launchApp() {
+    // Check karein agar app pehle se standalone/installed app ke roop me khuli hai ya nahi
+    if (isInstalledPWA()) {
+      // Agar app ke andar se open ho raha hai
+      window.location.href = "./app.html";
+      return;
+    }
+    
+    try {
+      if (!document.fullscreenElement &&
+        document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (error) {
+      console.log("Browser fullscreen unavailable");
+    }
+    
+    // Agar browser me website par hai, toh iframe me khulega
+    await openApp();
+  }
+  
+  // Automatically open app when installed PWA launches from mobile home screen icon
+  window.addEventListener("load", () => {
+    if (isInstalledPWA()) {
+      installBtn.style.display = "none";
+      // Agar PWA icon se khula hai toh seedha app.html load kar dega
+      window.location.href = "./app.html";
+    }
+  });
+  
+  // Installation prompt
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+    installBtn.style.display = "block";
+  });
+  
+  async function installPWA() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const result = await deferredPrompt.userChoice;
+      if (result.outcome === "accepted") {
+        installBtn.style.display = "none";
+      }
+      deferredPrompt = null;
+    } else {
+      alert(
+        "Android Chrome: 3 dots > Install app\n\n" +
+        "iPhone Safari: Share > Add to Home Screen"
       );
     }
-
-    // Open actual app
-    async function openApp() {
-      document.body.classList.add("in-landscape-mode");
-      overlay.style.display = "none";
-      frame.src = "./app.html";
-      frame.style.display = "block";
-
+  }
+  
+  window.addEventListener("appinstalled", () => {
+    installBtn.style.display = "none";
+    deferredPrompt = null;
+  });
+  
+  // Back button
+  window.addEventListener("popstate", () => {
+    document.body.classList.remove("in-landscape-mode");
+    overlay.style.display = "flex";
+    frame.style.display = "none";
+    frame.src = "about:blank";
+  });
+  
+  // Service Worker
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", async () => {
       try {
-        if (screen.orientation && screen.orientation.lock) {
-          await screen.orientation.lock("landscape");
-        }
+        await navigator.serviceWorker.register("./sw.js");
+        console.log("Service Worker Registered");
       } catch (error) {
-        console.log("Landscape lock unavailable");
-      }
-    }
-
-    // Launch from welcome screen
-    async function launchApp() {
-      try {
-        if (!document.fullscreenElement &&
-            document.documentElement.requestFullscreen) {
-          await document.documentElement.requestFullscreen();
-        }
-      } catch (error) {
-        console.log("Browser fullscreen unavailable");
-      }
-
-      await openApp();
-    }
-
-    // Automatically open app when installed PWA launches
-    window.addEventListener("load", () => {
-      if (isInstalledPWA()) {
-        installBtn.style.display = "none";
-        openApp();
+        console.error("Service Worker Error:", error);
       }
     });
-
-    // Installation prompt
-    window.addEventListener("beforeinstallprompt", (event) => {
-      event.preventDefault();
-      deferredPrompt = event;
-      installBtn.style.display = "block";
-    });
-
-    async function installPWA() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        if (result.outcome === "accepted") {
-          installBtn.style.display = "none";
-        }
-        deferredPrompt = null;
-      } else {
-        alert(
-          "Android Chrome: 3 dots > Install app\n\n" +
-          "iPhone Safari: Share > Add to Home Screen"
-        );
-      }
-    }
-
-    window.addEventListener("appinstalled", () => {
-      installBtn.style.display = "none";
-      deferredPrompt = null;
-    });
-
-    // Back button
-    window.addEventListener("popstate", () => {
-      document.body.classList.remove("in-landscape-mode");
-      overlay.style.display = "flex";
-      frame.style.display = "none";
-      frame.src = "about:blank";
-    });
-
-    // Service Worker
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", async () => {
-        try {
-          await navigator.serviceWorker.register("./sw.js");
-          console.log("Service Worker Registered");
-        } catch (error) {
-          console.error("Service Worker Error:", error);
-        }
-      });
-    }
-  </script>
+  }
+</script>
 
 </body>
 </html>
