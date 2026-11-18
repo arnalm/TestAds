@@ -334,11 +334,12 @@
   async function openApp() {
     document.body.classList.add("in-landscape-mode");
     overlay.style.display = "none";
+    
+    // History state push karein taaki back button detect ho sake
+    history.pushState({ view: "game" }, "", "");
+    
     frame.src = "./app.html";
     frame.style.display = "block";
-    
-    // 🔑 Yahan history state push ki gayi hai taaki back button dabane par home page par aa sakein
-    history.pushState({ page: "game" }, "", "");
     
     try {
       if (screen.orientation && screen.orientation.lock) {
@@ -406,14 +407,22 @@
     deferredPrompt = null;
   });
   
-  // 🔑 Back Button Event: Jaise hi user back dabayega, yeh function overlay (home screen) wapas le aayega
-  window.addEventListener("popstate", () => {
-    document.body.classList.remove("in-landscape-mode");
-    overlay.style.display = "flex";
-    frame.style.display = "none";
-    frame.src = "about:blank";
+  // 🔑 Back Button Handler (Mobile/Browser Back)
+  window.addEventListener("popstate", (event) => {
+    if (frame.style.display === "block") {
+      document.body.classList.remove("in-landscape-mode");
+      frame.style.display = "none";
+      frame.src = "about:blank";
+      overlay.style.display = "flex";
+      
+      // History stack balance rakhne ke liye
+      history.pushState(null, "", "");
+    }
   });
   
+  // Initial history state set karein
+  history.replaceState({ view: "home" }, "", "");
+
   // Service Worker
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
