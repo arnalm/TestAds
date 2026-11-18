@@ -81,7 +81,7 @@
       transform: scale(.96);
     }
 
-    #start-btn {
+    #start-btn, #rotate-btn {
       background: #fbbf24;
       color: #111827;
     }
@@ -199,11 +199,15 @@
 
 <body>
 
+  <!-- Rotate Warning Screen with Button -->
   <div id="rotate-warning">
     <h2>📱 Rotate Your Phone</h2>
-    <p style="margin-top:10px;color:#aaa">
-      Please rotate your phone horizontally.
+    <p style="margin-top:10px;margin-bottom:20px;color:#aaa">
+      Please rotate your phone horizontally to play.
     </p>
+    <button id="rotate-btn" onclick="forceLandscapeAndPlay()">
+      ⟳ Play in Landscape
+    </button>
   </div>
 
   <!-- Welcome Screen -->
@@ -266,6 +270,7 @@
   const frame = document.getElementById("main-frame");
   const installBtn = document.getElementById("install-btn");
   const shareModal = document.getElementById("share-modal");
+  const rotateWarning = document.getElementById("rotate-warning");
   
   // Share App Modal Functions
   function shareApp() {
@@ -350,6 +355,7 @@
   function openApp() {
     document.body.classList.add("in-landscape-mode");
     overlay.style.display = "none";
+    rotateWarning.style.display = "none";
     
     frame.src = "about:blank";
     
@@ -371,26 +377,35 @@
     }
     
     await requestFullscreen();
+    
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } catch (error) {
+      console.log("Orientation lock restriction:", error);
+    }
+    
     openApp();
   }
 
-  // 🔄 **Fullscreen exit hone par handle karna**
-  document.addEventListener("fullscreenchange", () => {
-    // Agar user ne game ke andar fullscreen se bahar aane ki koshish ki, 
-    // lekin game abhi bhi khula hai, toh hum check kar sakte hain. 
-    // Agar user w waqai back ana chahta hai, toh popstate sambhal lega.
-    if (!document.fullscreenElement && frame.style.display === "block") {
-      // Agar user ne sirf fullscreen cross kiya hai lekin game me hi hai, 
-      // toh hum ise ignore kar sakte hain ya wapas fullscreen daal sakte hain.
+  // 🔄 **Rotate Warning Button Click Handler**
+  async function forceLandscapeAndPlay() {
+    await requestFullscreen();
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } catch (error) {
+      console.log("Orientation lock restriction:", error);
     }
-  });
-
-  // Click par fullscreen maintain rakhne ke liye
-  window.addEventListener("click", async () => {
-    if (frame.style.display === "block" && !document.fullscreenElement) {
-      await requestFullscreen();
+    
+    // Warning hata kar game open kar do
+    rotateWarning.style.display = "none";
+    if (frame.style.display !== "block") {
+      openApp();
     }
-  });
+  }
   
   // Page Load check
   window.addEventListener("load", () => {
@@ -434,9 +449,8 @@
     deferredPrompt = null;
   });
   
-  // 🔑 Back Button Handler (Jab user waqai game band karna chahega tabhi home par jayega)
+  // Back Button Handler
   window.addEventListener("popstate", (event) => {
-    // Agar fullscreen active hai, toh pehle fullscreen band hone do ya seedha home jao
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
     }
@@ -445,6 +459,7 @@
     frame.style.display = "none";
     frame.src = "about:blank";
     overlay.style.display = "flex";
+    rotateWarning.style.display = "none";
     
     if (window.location.hash !== "#home") {
       history.replaceState({ view: "home" }, "", "#home");
