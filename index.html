@@ -98,85 +98,6 @@
       border: 1px solid #6b7280;
     }
 
-    /* Share Modal Styling */
-    #share-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.78);
-      z-index: 10002;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .share-box {
-      background: #1f2937;
-      border: 1px solid #4b5563;
-      border-radius: 16px;
-      padding: 22px;
-      width: 100%;
-      max-width: 320px;
-      text-align: center;
-      color: white;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    }
-
-    .share-box h3 {
-      color: #fbbf24;
-      margin-bottom: 16px;
-      font-size: 20px;
-    }
-
-    .share-options {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .share-opt-btn {
-      width: 100%;
-      max-width: none;
-      margin-top: 0;
-      padding: 12px 8px;
-      font-size: 14px;
-      border-radius: 10px;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .btn-wa {
-      background: #25D366;
-      color: #0b141a;
-    }
-
-    .btn-fb {
-      background: #1877F2;
-    }
-
-    .btn-ig {
-      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-    }
-
-    .btn-other {
-      background: #4b5563;
-    }
-
-    .close-share-btn {
-      width: 100%;
-      max-width: none;
-      padding: 10px;
-      margin-top: 4px;
-      background: transparent;
-      border: 1px solid #6b7280;
-      color: #d1d5db;
-      font-size: 14px;
-    }
-
     #main-frame {
       display: none;
       position: fixed;
@@ -187,12 +108,12 @@
       border: 0;
       background: #000;
     }
+
   </style>
 </head>
 
 <body>
 
-  <!-- Welcome Screen -->
   <div id="start-overlay">
 
     <div class="logo">🚚⛽</div>
@@ -204,325 +125,143 @@
       Ready to Play?
     </p>
 
-    <button id="start-btn" onclick="launchApp()">
-      ▶ Play Now
-    </button>
+    <a href="./app.html"
+       style="text-decoration:none; width:240px; max-width:90%;">
 
-    <button id="install-btn" onclick="installPWA()">
+      <button id="start-btn" type="button">
+        ▶ Play Now
+      </button>
+
+    </a>
+
+    <button id="install-btn" type="button">
       📲 Install App
     </button>
 
-    <button class="secondary" onclick="shareApp()">
+    <button class="secondary" type="button">
       📤 Share App
     </button>
 
   </div>
 
-  <!-- Share Options Modal -->
-  <div id="share-modal" onclick="closeShareModal()">
-
-    <div class="share-box" onclick="event.stopPropagation()">
-
-      <h3>📤 Share Game</h3>
-
-      <div class="share-options">
-
-        <button class="share-opt-btn btn-wa"
-                onclick="shareTo('whatsapp')">
-          💬 WhatsApp
-        </button>
-
-        <button class="share-opt-btn btn-fb"
-                onclick="shareTo('facebook')">
-          📘 Facebook
-        </button>
-
-        <button class="share-opt-btn btn-ig"
-                onclick="shareTo('instagram')">
-          📸 Instagram
-        </button>
-
-        <button class="share-opt-btn btn-other"
-                onclick="shareTo('other')">
-          🔗 Other
-        </button>
-
-      </div>
-
-      <button class="close-share-btn"
-              onclick="closeShareModal()">
-        Cancel
-      </button>
-
-    </div>
-  </div>
-
-  <!-- Main Game Frame -->
-  <iframe
-    id="main-frame"
-    title="My App"
-    allow="fullscreen"
-    allowfullscreen>
-  </iframe>
-
-<script>
-
-  let deferredPrompt = null;
-
-  const overlay = document.getElementById("start-overlay");
-  const frame = document.getElementById("main-frame");
-  const installBtn = document.getElementById("install-btn");
-  const shareModal = document.getElementById("share-modal");
-
-  // Share App Modal
-  function shareApp() {
-    shareModal.style.display = "flex";
-  }
-
-  function closeShareModal() {
-    shareModal.style.display = "none";
-  }
-
-  // Share Functions
-  async function shareTo(platform) {
-
-    const shareTitle = "TIME & TEL Game";
-    const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
-    const shareUrl = window.location.href;
-    const fullMessage = `${shareText} ${shareUrl}`;
-
-    if (platform === "whatsapp") {
-
-      window.open(
-        `https://api.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`,
-        "_blank"
-      );
-
-    }
-
-    else if (platform === "facebook") {
-
-      window.open(
-        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-        "_blank"
-      );
-
-    }
-
-    else if (platform === "instagram") {
-
-      try {
-
-        await navigator.clipboard.writeText(fullMessage);
-
-        alert("Link copied! Opening Instagram—paste it in your Story, Bio, or DM.");
-
-      } catch (err) {
-
-        alert("Copy this link to share on Instagram:\n" + shareUrl);
-
-      }
-
-      window.open("https://www.instagram.com/", "_blank");
-
-    }
-
-    else if (platform === "other") {
-
-      if (navigator.share) {
-
-        try {
-
-          await navigator.share({
-            title: shareTitle,
-            text: shareText,
-            url: shareUrl
-          });
-
-        } catch (err) {
-
-          console.log("Share cancelled");
-
-        }
-
-      } else {
-
-        try {
-
-          await navigator.clipboard.writeText(fullMessage);
-
-          alert("Game link copied to clipboard!");
-
-        } catch (err) {
-
-          alert("Share this link:\n" + shareUrl);
-
-        }
-
-      }
-
-    }
-
-    closeShareModal();
-
-  }
-
-  // Check Installed PWA
-  function isInstalledPWA() {
-
-    return (
-      window.matchMedia("(display-mode: fullscreen)").matches ||
-      window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone === true
-    );
-
-  }
-
-  // Open Actual App
-  async function openApp() {
-
-    overlay.style.display = "none";
-
-    frame.src = "./app.html";
-
-    frame.style.display = "block";
-
-    history.pushState(
-      { page: "game" },
-      "",
-      ""
-    );
-
-  }
-
-  // Launch App
-  async function launchApp() {
-
-    if (isInstalledPWA()) {
-
-      window.location.href = "./app.html";
-
-      return;
-
-    }
-
-    try {
-
-      if (
-        !document.fullscreenElement &&
-        document.documentElement.requestFullscreen
-      ) {
-
-        await document.documentElement.requestFullscreen();
-
-      }
-
-    } catch (error) {
-
-      console.log("Browser fullscreen unavailable");
-
-    }
-
-    await openApp();
-
-  }
-
-  // Page Load Check
-  window.addEventListener("load", () => {
-
-    if (isInstalledPWA()) {
-
-      installBtn.style.display = "none";
-
-      window.location.href = "./app.html";
-
-    }
-
-  });
-
-  // Installation Prompt
-  window.addEventListener("beforeinstallprompt", (event) => {
-
-    event.preventDefault();
-
-    deferredPrompt = event;
-
-    if (!isInstalledPWA()) {
-
-      installBtn.style.display = "block";
-
-    }
-
-  });
-
-  async function installPWA() {
-
-    if (deferredPrompt) {
-
-      deferredPrompt.prompt();
-
-      const result = await deferredPrompt.userChoice;
-
-      if (result.outcome === "accepted") {
-
-        installBtn.style.display = "none";
-
-      }
-
-      deferredPrompt = null;
-
-    } else {
-
-      alert(
-        "Android Chrome: 3 dots > Install app\n\n" +
-        "iPhone Safari: Share > Add to Home Screen"
-      );
-
-    }
-
-  }
-
-  window.addEventListener("appinstalled", () => {
-
+<script type="text/javascript" charset="utf-8">
+//____app install button code____
+
+let deferredPrompt = null;
+
+const installBtn = document.getElementById("install-btn");
+
+// Check if PWA is installed
+function isInstalledPWA() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.matchMedia("(display-mode: fullscreen)").matches ||
+    window.navigator.standalone === true
+  );
+}
+
+// Check installation status
+function checkInstallStatus() {
+  if (isInstalledPWA()) {
     installBtn.style.display = "none";
+  } else {
+    installBtn.style.display = "block";
+  }
+}
+
+// Initial check
+checkInstallStatus();
+
+// Detect install availability
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+
+  deferredPrompt = event;
+
+  checkInstallStatus();
+});
+
+// Install button
+installBtn.addEventListener("click", async () => {
+
+  if (deferredPrompt) {
+
+    deferredPrompt.prompt();
+
+    const result = await deferredPrompt.userChoice;
+
+    if (result.outcome === "accepted") {
+      installBtn.style.display = "none";
+    }
 
     deferredPrompt = null;
 
-  });
+  } else {
 
-  // Back Button: Return to Home Screen
-  window.addEventListener("popstate", () => {
-
-    overlay.style.display = "flex";
-
-    frame.style.display = "none";
-
-    frame.src = "about:blank";
-
-  });
-
-  // Service Worker
-  if ("serviceWorker" in navigator) {
-
-    window.addEventListener("load", async () => {
-
-      try {
-
-        await navigator.serviceWorker.register("./sw.js");
-
-        console.log("Service Worker Registered");
-
-      } catch (error) {
-
-        console.error("Service Worker Error:", error);
-
-      }
-
-    });
+    alert(
+      "Android Chrome: 3 dots > Install App\n\n" +
+      "iPhone Safari: Share > Add to Home Screen"
+    );
 
   }
 
+});
+
+// When app gets installed
+window.addEventListener("appinstalled", () => {
+  installBtn.style.display = "none";
+  deferredPrompt = null;
+});
+//_______shere button code_______ 
+
+
+const shareBtn = document.getElementById("share-btn");
+
+shareBtn.addEventListener("click", async () => {
+
+  const shareData = {
+    title: "TIME & TEL Game",
+    text: "🚚⛽ Play TIME & TEL Game! Try this amazing game!",
+    url: window.location.href
+  };
+
+  // Native mobile sharing
+  if (navigator.share) {
+
+    try {
+      await navigator.share(shareData);
+    } catch (error) {
+      console.log("Sharing cancelled");
+    }
+
+  } else {
+
+    // Fallback: Copy link
+    try {
+
+      await navigator.clipboard.writeText(
+        shareData.text + " " + shareData.url
+      );
+
+      alert("Game link copied! Share it with your friends.");
+
+    } catch (error) {
+
+      prompt("Copy your game link:", shareData.url);
+
+    }
+
+  }
+
+});
+
+
+
+
+  
 </script>
+
+
 
 </body>
 </html>
