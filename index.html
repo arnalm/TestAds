@@ -1,14 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
   <title>TIME & TEL</title>
+
   <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="TIME & TEL">
+
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
@@ -27,12 +31,9 @@
 
     html, body {
       width: 100%;
-      height: 100vh;
+      height: 100%;
       overflow: hidden;
       background-color: gray;
-      margin: 0;
-      padding: 0;
-      border: 0;
       font-family: Arial, sans-serif;
       visibility: hidden;
       touch-action: none;
@@ -80,7 +81,6 @@
       font-size: 17px;
       font-weight: bold;
       cursor: pointer;
-      outline: none;
       touch-action: manipulation;
     }
 
@@ -105,12 +105,11 @@
       border: 1px solid #6b7280;
     }
 
-    /* Share Modal Styling */
     #share-modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.78);
+      background: rgba(0,0,0,.78);
       z-index: 10002;
       justify-content: center;
       align-items: center;
@@ -126,7 +125,7 @@
       max-width: 320px;
       text-align: center;
       color: white;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 25px rgba(0,0,0,.5);
     }
 
     .share-box h3 {
@@ -150,15 +149,11 @@
       font-size: 14px;
       border-radius: 10px;
       color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
     }
 
     .btn-wa { background: #25D366; color: #0b141a; }
     .btn-fb { background: #1877F2; }
-    .btn-ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .btn-ig { background: linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
     .btn-other { background: #4b5563; }
 
     .close-share-btn {
@@ -180,26 +175,28 @@
       height: 100%;
       height: 100dvh;
       border: none;
-      outline: none;
       background: #000;
     }
   </style>
 
   <script>
     let lastTouchEnd = 0;
-    document.addEventListener("touchend", function (event) {
+
+    document.addEventListener("touchend", function(event) {
       const now = Date.now();
+
       if (now - lastTouchEnd <= 300) {
         event.preventDefault();
       }
+
       lastTouchEnd = now;
     }, { passive: false });
 
-    document.addEventListener("gesturestart", function (event) {
+    document.addEventListener("gesturestart", function(event) {
       event.preventDefault();
     }, { passive: false });
 
-    document.addEventListener("dblclick", function (event) {
+    document.addEventListener("dblclick", function(event) {
       event.preventDefault();
     }, { passive: false });
 
@@ -220,6 +217,7 @@
 <body>
 
   <div id="start-overlay">
+
     <div class="logo">🚚⛽</div>
 
     <h1>TIME & TEL</h1>
@@ -232,47 +230,66 @@
     <button id="start-btn" onclick="launchApp()">
       ▶ Play Now
     </button>
- 
+
     <button id="install-btn" onclick="installPWA()">
       📲 Install App
     </button>
- 
+
     <button class="secondary" onclick="shareApp()">
       📤 Share App
     </button>
+
   </div>
 
-  <div id="share-modal" onclick="closeShareModal(event)">
+  <div id="share-modal" onclick="closeShareModal()">
+
     <div class="share-box" onclick="event.stopPropagation()">
+
       <h3>📤 Share Game</h3>
+
       <div class="share-options">
-        <button class="share-opt-btn btn-wa" onclick="shareTo('whatsapp')">
+
+        <button class="share-opt-btn btn-wa"
+          onclick="shareTo('whatsapp')">
           💬 WhatsApp
         </button>
-        <button class="share-opt-btn btn-fb" onclick="shareTo('facebook')">
+
+        <button class="share-opt-btn btn-fb"
+          onclick="shareTo('facebook')">
           📘 Facebook
         </button>
-        <button class="share-opt-btn btn-ig" onclick="shareTo('instagram')">
+
+        <button class="share-opt-btn btn-ig"
+          onclick="shareTo('instagram')">
           📸 Instagram
         </button>
-        <button class="share-opt-btn btn-other" onclick="shareTo('other')">
+
+        <button class="share-opt-btn btn-other"
+          onclick="shareTo('other')">
           🔗 Other
         </button>
+
       </div>
-      <button class="close-share-btn" onclick="closeShareModal()">Cancel</button>
+
+      <button class="close-share-btn"
+        onclick="closeShareModal()">
+        Cancel
+      </button>
+
     </div>
   </div>
 
   <iframe
     id="main-frame"
-    title="My App"
+    title="TIME & TEL Game"
     allow="fullscreen"
     allowfullscreen>
   </iframe>
 
   <script>
     let deferredPrompt = null;
-    
+    let gameOpen = false;
+
     const overlay = document.getElementById("start-overlay");
     const frame = document.getElementById("main-frame");
     const installBtn = document.getElementById("install-btn");
@@ -281,37 +298,49 @@
     document.addEventListener("DOMContentLoaded", () => {
       document.body.style.visibility = "visible";
     });
-    
+
     function shareApp() {
       shareModal.style.display = "flex";
     }
-    
+
     function closeShareModal() {
       shareModal.style.display = "none";
     }
-    
+
     async function shareTo(platform) {
+
       const shareTitle = "TIME & TEL Game";
       const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
       const shareUrl = window.location.href;
       const fullMessage = `${shareText} ${shareUrl}`;
-      
+
       if (platform === "whatsapp") {
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`, "_blank");
-      }
-      else if (platform === "facebook") {
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, "_blank");
-      }
-      else if (platform === "instagram") {
+
+        window.open(
+          `https://api.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`,
+          "_blank"
+        );
+
+      } else if (platform === "facebook") {
+
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+          "_blank"
+        );
+
+      } else if (platform === "instagram") {
+
         try {
           await navigator.clipboard.writeText(fullMessage);
-          alert("Link copied! Opening Instagram—paste it in your Story, Bio, or DM.");
+          alert("Link copied! Opening Instagram.");
         } catch (err) {
-          alert("Copy this link to share on Instagram:\n" + shareUrl);
+          alert("Copy this link:\n" + shareUrl);
         }
+
         window.open("https://www.instagram.com/", "_blank");
-      }
-      else if (platform === "other") {
+
+      } else if (platform === "other") {
+
         if (navigator.share) {
           try {
             await navigator.share({
@@ -325,38 +354,47 @@
         } else {
           try {
             await navigator.clipboard.writeText(fullMessage);
-            alert("Game link copied to clipboard!");
+            alert("Game link copied!");
           } catch (err) {
             alert("Share this link:\n" + shareUrl);
           }
         }
       }
-      
+
       closeShareModal();
     }
-    
+
     function enterFullscreen() {
+
       const elem = document.documentElement;
+
       if (!document.fullscreenElement) {
+
         if (elem.requestFullscreen) {
-          elem.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+          elem.requestFullscreen({
+            navigationUI: "hide"
+          }).catch(() => {});
         } else if (elem.webkitRequestFullscreen) {
           elem.webkitRequestFullscreen();
         }
       }
     }
 
-    async function openApp() {
-      if (overlay) overlay.style.display = "none";
-      if (frame) {
-        frame.src = "./app.html";
-        frame.style.display = "block";
-      }
-      
-      if (!isInstalledPWA()) {
-        history.pushState({ page: "game" }, "", "");
-      }
-      
+    function openApp() {
+
+      overlay.style.display = "none";
+
+      frame.style.display = "block";
+      frame.src = "./app.html";
+
+      gameOpen = true;
+
+      history.pushState(
+        { page: "game" },
+        "",
+        window.location.href
+      );
+
       try {
         if (screen.orientation && screen.orientation.lock) {
           screen.orientation.lock("landscape").catch(() => {});
@@ -365,71 +403,120 @@
         console.log("Landscape lock unavailable");
       }
     }
-    
-    async function launchApp() {
+
+    function launchApp() {
       enterFullscreen();
       openApp();
     }
-    
+
+    // APP.HTML SE WELCOME PAGE PAR RETURN
+
+    function returnToHome() {
+
+      if (!gameOpen) return;
+
+      gameOpen = false;
+
+      frame.style.display = "none";
+      frame.src = "about:blank";
+
+      overlay.style.display = "flex";
+
+      try {
+        if (screen.orientation && screen.orientation.unlock) {
+          screen.orientation.unlock();
+        }
+      } catch (error) {}
+
+    }
+
+    // Receive message from app.html
+
+    window.addEventListener("message", function(event) {
+
+      if (event.data === "GO_BACK_TO_HOME") {
+        returnToHome();
+      }
+
+    });
+
+    // Browser back button
+
+    window.addEventListener("popstate", function() {
+
+      if (gameOpen) {
+        returnToHome();
+      }
+
+    });
+
+    // PWA INSTALL
+
     window.addEventListener("beforeinstallprompt", (event) => {
+
       event.preventDefault();
+
       deferredPrompt = event;
-      
-      if (!isInstalledPWA() && installBtn) {
+
+      if (!isInstalledPWA()) {
         installBtn.style.display = "block";
       }
+
     });
-    
+
     async function installPWA() {
+
       if (deferredPrompt) {
+
         deferredPrompt.prompt();
+
         const result = await deferredPrompt.userChoice;
-        if (result.outcome === "accepted" && installBtn) {
+
+        if (result.outcome === "accepted") {
           installBtn.style.display = "none";
         }
+
         deferredPrompt = null;
+
       } else {
+
         alert(
           "Android Chrome: 3 dots > Install app\n\n" +
           "iPhone Safari: Share > Add to Home Screen"
         );
+
       }
     }
-    
+
     window.addEventListener("appinstalled", () => {
-      if (installBtn) installBtn.style.display = "none";
+
+      installBtn.style.display = "none";
       deferredPrompt = null;
-    });
-    
-    window.addEventListener("popstate", () => {
-      if (!isInstalledPWA()) {
-        // Screen orientation unlock (optional, agar chaho toh hata sakte ho)
-        try {
-          if (screen.orientation && screen.orientation.unlock) {
-            screen.orientation.unlock();
-          }
-        } catch (e) {}
 
-        // NOTE: Fullscreen exit yahan se hata diya hai taaki screen fullscreen hi rahe!
-
-        if (overlay) overlay.style.display = "flex";
-        if (frame) {
-          frame.style.display = "none";
-          frame.src = "about:blank";
-        }
-      }
     });
-    
+
+    // SERVICE WORKER
+
     if ("serviceWorker" in navigator) {
+
       window.addEventListener("load", async () => {
+
         try {
+
           await navigator.serviceWorker.register("./sw.js");
+
           console.log("Service Worker Registered");
+
         } catch (error) {
+
           console.error("Service Worker Error:", error);
+
         }
+
       });
+
     }
+
   </script>
 
 </body>
