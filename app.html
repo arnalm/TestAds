@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Door 90° Open</title>
 <style>
-    /* 🔑 Yahan '-' ki jagah '*' kiya gaya hai */
     * {
       margin: 0;
       padding: 0;
@@ -26,27 +25,31 @@
       padding: 0;
       border: 0;
       font-family: Arial, sans-serif;
-      touch-action: manipulation;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
     }
 </style>
 </head>
 <body>
 
 <script type="module">
-// 🔑 Screen ko visible karne ke liye taaki canvas/three.js dikhai de
-document.body.style.visibility = "visible";
-
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xaaaaaa);
+scene.background = new THREE.Color(0x222222);
 
-const camera = new THREE.PerspectiveCamera(35, innerWidth/innerHeight, 0.1, 100);
+const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(4, 3, 6);
 camera.lookAt(0, 1, 0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(innerWidth, innerHeight);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
 // Light
@@ -96,9 +99,13 @@ pivot.add(door);
 
 let target = 0;
 
-// Click => Open/Close
+// Click / Tap => Open/Close
 window.addEventListener("click", () => {
     target = target === 0 ? Math.PI / 2 : 0; // 90°
+});
+
+window.addEventListener("touchstart", () => {
+    target = target === 0 ? Math.PI / 2 : 0; // 90° for mobile touch
 });
 
 function animate() {
@@ -116,9 +123,9 @@ function animate() {
 animate();
 
 window.addEventListener("resize", () => {
-    camera.aspect = innerWidth / innerHeight;
+    camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth, innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
 
