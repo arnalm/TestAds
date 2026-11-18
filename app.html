@@ -96,6 +96,35 @@
 
    
 </script>
+
+<script>
+  const offlineBox = document.getElementById('simple-offline-box');
+
+  // Internet band hone par dikhayein
+  window.addEventListener('offline', () => {
+    offlineBox.style.display = 'flex';
+  });
+
+  // Internet aane par apne aap hatayein
+  window.addEventListener('online', () => {
+    offlineBox.style.display = 'none';
+  });
+
+  // Shuru mein check karein
+  if (!navigator.onLine) {
+    offlineBox.style.display = 'flex';
+  }
+
+  // Retry button dabane par
+  function checkInternet() {
+    if (navigator.onLine) {
+      offlineBox.style.display = 'none';
+    }
+  }
+</script>
+
+
+   
 <script type="module">
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
