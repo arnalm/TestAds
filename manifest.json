@@ -4,7 +4,7 @@
   "name": "My Fullscreen Landscape App",
   "short_name": "My App",
   "description": "Fullscreen Landscape Application",
-  "start_url": "./index.html",
+  "start_url": "./app.html",
   "scope": "./",
   "display": "fullscreen",
   "orientation": "landscape",
