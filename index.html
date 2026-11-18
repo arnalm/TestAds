@@ -149,81 +149,37 @@
     // PWA INSTALL BUTTON
     // ==============================
 
-    let deferredPrompt = null;
+    
+const installBtn = document.getElementById("install-btn");
 
-    const installBtn = document.getElementById("install-btn");
+function isInstalledPWA() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.matchMedia("(display-mode: fullscreen)").matches ||
+    window.navigator.standalone === true
+  );
+}
 
-    function isInstalledPWA() {
+function updateInstallButton() {
+  if (isInstalledPWA()) {
+    installBtn.style.display = "none";
+  } else {
+    installBtn.style.display = "block";
+  }
+}
 
-      return (
-        window.matchMedia("(display-mode: standalone)").matches ||
-        window.matchMedia("(display-mode: fullscreen)").matches ||
-        window.navigator.standalone === true
-      );
+// Page load aur reload par check
+updateInstallButton();
 
-    }
+// App install hone ke baad
+window.addEventListener("appinstalled", () => {
+  installBtn.style.display = "none";
+});
 
-    function checkInstallStatus() {
+// Display mode change hone par
+window.matchMedia("(display-mode: standalone)")
+  .addEventListener("change", updateInstallButton);
 
-      if (isInstalledPWA()) {
-
-        installBtn.style.display = "none";
-
-      } else {
-
-        installBtn.style.display = "block";
-
-      }
-
-    }
-
-    checkInstallStatus();
-
-    window.addEventListener("beforeinstallprompt", (event) => {
-
-      event.preventDefault();
-
-      deferredPrompt = event;
-
-      checkInstallStatus();
-
-    });
-
-    installBtn.addEventListener("click", async () => {
-
-      if (deferredPrompt) {
-
-        deferredPrompt.prompt();
-
-        const result = await deferredPrompt.userChoice;
-
-        if (result.outcome === "accepted") {
-
-          installBtn.style.display = "none";
-
-        }
-
-        deferredPrompt = null;
-
-      } else {
-
-        installBtn.style.display = "none";
-        alert(
-          "Android Chrome: 3 dots > Install App\n\n" +
-          "iPhone Safari: Share > Add to Home Screen"
-        );
-
-      }
-
-    });
-
-    window.addEventListener("appinstalled", () => {
-
-      installBtn.style.display = "none";
-
-      deferredPrompt = null;
-
-    });
 
 
     // ==============================
