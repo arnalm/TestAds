@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
 
   <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
   <title>TIME & TEL</title>
 
@@ -20,7 +20,6 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
-
     * {
       margin: 0;
       padding: 0;
@@ -91,6 +90,7 @@
     #install-btn {
       background: #16a34a;
       color: white;
+      display: none;
     }
 
     .secondary {
@@ -98,13 +98,10 @@
       color: white;
       border: 1px solid #6b7280;
     }
-
   </style>
 </head>
 
 <body>
-
-  <!-- Welcome Screen -->
 
   <div id="start-overlay">
 
@@ -117,10 +114,8 @@
       Ready to Play?
     </p>
 
-    <!-- Play Now: Normal Page Opening -->
-
     <a href="./app.html"
-       style="text-decoration:none; width:240px; max-width:90%;">
+      style="text-decoration:none; width:240px; max-width:90%;">
 
       <button id="start-btn" type="button">
         ▶ Play Now
@@ -128,13 +123,9 @@
 
     </a>
 
-    <!-- Install Button -->
-
     <button id="install-btn" type="button">
       📲 Install App
     </button>
-
-    <!-- Share Button -->
 
     <button class="secondary" id="share-btn" type="button">
       📤 Share App
@@ -142,92 +133,105 @@
 
   </div>
 
-
   <script>
-
-    // ==============================
+    // =========================
     // PWA INSTALL BUTTON
-    // ==============================
+    // =========================
 
-    
-const installBtn = document.getElementById("install-btn");
+    const installBtn = document.getElementById("install-btn");
 
-function isInstalledPWA() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.matchMedia("(display-mode: fullscreen)").matches ||
-    window.navigator.standalone === true
-  );
-}
+    let deferredPrompt = null;
 
-function updateInstallButton() {
-  if (isInstalledPWA()) {
-    installBtn.style.display = "none";
-  } else {
-    installBtn.style.display = "block";
-  }
-}
+    function isInstalledPWA() {
+      return (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.matchMedia("(display-mode: fullscreen)").matches ||
+        window.matchMedia("(display-mode: minimal-ui)").matches ||
+        window.navigator.standalone === true
+      );
+    }
 
-// Page load aur reload par check
-updateInstallButton();
+    function updateInstallButton() {
+      if (isInstalledPWA()) {
+        installBtn.style.display = "none";
+      } else if (deferredPrompt) {
+        installBtn.style.display = "block";
+      } else {
+        installBtn.style.display = "none";
+      }
+    }
 
-// App install hone ke baad
-window.addEventListener("appinstalled", () => {
-  installBtn.style.display = "none";
-});
+    // Check on page load and reload
+    updateInstallButton();
 
-// Display mode change hone par
-window.matchMedia("(display-mode: standalone)")
-  .addEventListener("change", updateInstallButton);
+    // Browser says installation is available
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+
+      deferredPrompt = event;
+
+      updateInstallButton();
+    });
+
+    // Install button click
+    installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+
+      deferredPrompt.prompt();
+
+      const result = await deferredPrompt.userChoice;
+
+      deferredPrompt = null;
+
+      updateInstallButton();
+
+      if (result.outcome === "accepted") {
+        installBtn.style.display = "none";
+      }
+    });
+
+    // App installed
+    window.addEventListener("appinstalled", () => {
+      deferredPrompt = null;
+      installBtn.style.display = "none";
+    });
+
+    // Display mode changes
+    const displayMode = window.matchMedia("(display-mode: standalone)");
+
+    displayMode.addEventListener("change", updateInstallButton);
 
 
-
-    // ==============================
+    // =========================
     // SHARE APP BUTTON
-    // ==============================
+    // =========================
 
     const shareBtn = document.getElementById("share-btn");
 
     shareBtn.addEventListener("click", async () => {
 
       const shareData = {
-
         title: "TIME & TEL Game",
-
         text: "🚚⛽ Play TIME & TEL Game! Try this amazing game!",
-
         url: window.location.href
-
       };
 
       if (navigator.share) {
-
         try {
-
           await navigator.share(shareData);
-
         } catch (error) {
-
           console.log("Sharing cancelled");
-
         }
-
       } else {
-
         try {
-
           await navigator.clipboard.writeText(
             shareData.text + " " + shareData.url
           );
 
           alert("Game link copied! Share it with your friends.");
-
         } catch (error) {
-
           prompt("Copy your game link:", shareData.url);
-
         }
-
       }
 
     });
