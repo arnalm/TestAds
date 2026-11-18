@@ -81,7 +81,7 @@
       transform: scale(.96);
     }
 
-    #start-btn, #rotate-btn {
+    #start-btn {
       background: #fbbf24;
       color: #111827;
     }
@@ -199,15 +199,11 @@
 
 <body>
 
-  <!-- Rotate Warning Screen with Button -->
   <div id="rotate-warning">
     <h2>📱 Rotate Your Phone</h2>
-    <p style="margin-top:10px;margin-bottom:20px;color:#aaa">
-      Please rotate your phone horizontally to play.
+    <p style="margin-top:10px;color:#aaa">
+      Please rotate your phone horizontally.
     </p>
-    <button id="rotate-btn" onclick="forceLandscapeAndPlay()">
-      ⟳ Play in Landscape
-    </button>
   </div>
 
   <!-- Welcome Screen -->
@@ -270,7 +266,6 @@
   const frame = document.getElementById("main-frame");
   const installBtn = document.getElementById("install-btn");
   const shareModal = document.getElementById("share-modal");
-  const rotateWarning = document.getElementById("rotate-warning");
   
   // Share App Modal Functions
   function shareApp() {
@@ -284,7 +279,7 @@
   async function shareTo(platform) {
     const shareTitle = "TIME & TEL Game";
     const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
-    const shareUrl = window.location.href.split('#')[0];
+    const shareUrl = window.location.href;
     const fullMessage = `${shareText} ${shareUrl}`;
     
     if (platform === "whatsapp") {
@@ -335,38 +330,23 @@
     );
   }
   
-  // Fullscreen trigger function
-  async function requestFullscreen() {
-    try {
-      const docEl = document.documentElement;
-      if (!document.fullscreenElement) {
-        if (docEl.requestFullscreen) {
-          await docEl.requestFullscreen();
-        } else if (docEl.webkitRequestFullscreen) {
-          await docEl.webkitRequestFullscreen();
-        }
-      }
-    } catch (error) {
-      console.log("Fullscreen restriction:", error);
-    }
-  }
-
-  // Open actual app function
-  function openApp() {
+  // Open actual app
+  async function openApp() {
     document.body.classList.add("in-landscape-mode");
     overlay.style.display = "none";
-    rotateWarning.style.display = "none";
+    frame.src = "./app.html";
+    frame.style.display = "block";
     
-    frame.src = "about:blank";
+    // 🔑 Yahan history state push ki gayi hai taaki back button dabane par home page par aa sakein
+    history.pushState({ page: "game" }, "", "");
     
-    if (window.location.hash !== "#game") {
-      history.pushState({ view: "game" }, "", "#game");
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } catch (error) {
+      console.log("Landscape lock unavailable");
     }
-    
-    setTimeout(() => {
-      frame.src = "./app.html";
-      frame.style.display = "block";
-    }, 50);
   }
   
   // Launch from welcome screen
@@ -376,35 +356,16 @@
       return;
     }
     
-    await requestFullscreen();
-    
     try {
-      if (screen.orientation && screen.orientation.lock) {
-        await screen.orientation.lock("landscape");
+      if (!document.fullscreenElement &&
+        document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
       }
     } catch (error) {
-      console.log("Orientation lock restriction:", error);
+      console.log("Browser fullscreen unavailable");
     }
     
-    openApp();
-  }
-
-  // 🔄 **Rotate Warning Button Click Handler**
-  async function forceLandscapeAndPlay() {
-    await requestFullscreen();
-    try {
-      if (screen.orientation && screen.orientation.lock) {
-        await screen.orientation.lock("landscape");
-      }
-    } catch (error) {
-      console.log("Orientation lock restriction:", error);
-    }
-    
-    // Warning hata kar game open kar do
-    rotateWarning.style.display = "none";
-    if (frame.style.display !== "block") {
-      openApp();
-    }
+    await openApp();
   }
   
   // Page Load check
@@ -412,10 +373,6 @@
     if (isInstalledPWA()) {
       installBtn.style.display = "none";
       window.location.href = "./app.html";
-    } else {
-      if (!window.location.hash || window.location.hash === "#game") {
-        history.replaceState({ view: "home" }, "", "#home");
-      }
     }
   });
   
@@ -449,23 +406,14 @@
     deferredPrompt = null;
   });
   
-  // Back Button Handler
-  window.addEventListener("popstate", (event) => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
-    }
-    
+  // 🔑 Back Button Event: Jaise hi user back dabayega, yeh function overlay (home screen) wapas le aayega
+  window.addEventListener("popstate", () => {
     document.body.classList.remove("in-landscape-mode");
+    overlay.style.display = "flex";
     frame.style.display = "none";
     frame.src = "about:blank";
-    overlay.style.display = "flex";
-    rotateWarning.style.display = "none";
-    
-    if (window.location.hash !== "#home") {
-      history.replaceState({ view: "home" }, "", "#home");
-    }
   });
-
+  
   // Service Worker
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
