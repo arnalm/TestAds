@@ -403,15 +403,14 @@
     
     window.addEventListener("popstate", () => {
       if (!isInstalledPWA()) {
+        // Screen orientation unlock (optional, agar chaho toh hata sakte ho)
         try {
           if (screen.orientation && screen.orientation.unlock) {
             screen.orientation.unlock();
           }
         } catch (e) {}
 
-        if (document.fullscreenElement) {
-          document.exitFullscreen().catch(() => {});
-        }
+        // NOTE: Fullscreen exit yahan se hata diya hai taaki screen fullscreen hi rahe!
 
         if (overlay) overlay.style.display = "flex";
         if (frame) {
