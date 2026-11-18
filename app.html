@@ -16,21 +16,27 @@
       touch-action: manipulation;
     }
    html, body {
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
-      background: #000;
-      margin: 0;
-      padding: 0;
-      border: 0;
-      font-family: Arial, sans-serif;
-      touch-action: none;
-      overscroll-behavior: none;
-      position: fixed;
-   }
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    background: #000;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    visibility: hidden; /* 🔑 Jab tak style load na ho, chhipa rahega */
+    touch-action: none;
+    overscroll-behavior: none;
+  }
 </style>
 </head>
 <body>
+   <script>
+  // Page load hote hi turant body ko visible kar do
+  document.addEventListener("DOMContentLoaded", () => {
+    document.body.style.visibility = "visible";
+  });
+</script>
 
 <script type="module">
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
