@@ -3,9 +3,9 @@ const CACHE_NAME = "my-fullscreen-pwa-v2";
 
 const FILES = [
   "./",
-  "./index.html",
-  "./manifest.json",
   "./app.html",
+  "./manifest.json",
+  "./index.html",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
 ];
