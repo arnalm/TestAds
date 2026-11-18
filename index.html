@@ -89,7 +89,6 @@
     #install-btn {
       background: #16a34a;
       color: white;
-      display: none;
     }
 
     .secondary {
@@ -280,7 +279,7 @@
   async function shareTo(platform) {
     const shareTitle = "TIME & TEL Game";
     const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
-    const shareUrl = window.location.href.split('#')[0];
+    const shareUrl = window.location.href;
     const fullMessage = `${shareText} ${shareUrl}`;
     
     if (platform === "whatsapp") {
@@ -331,23 +330,42 @@
     );
   }
   
-  // Open actual app (Normal mode, no fullscreen/orientation lock)
-  function openApp() {
+  // Open actual app
+  async function openApp() {
+    document.body.classList.add("in-landscape-mode");
     overlay.style.display = "none";
     frame.src = "./app.html";
     frame.style.display = "block";
     
+    // 🔑 Yahan history state push ki gayi hai taaki back button dabane par home page par aa sakein
     history.pushState({ page: "game" }, "", "");
+    
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } catch (error) {
+      console.log("Landscape lock unavailable");
+    }
   }
   
   // Launch from welcome screen
-  function launchApp() {
+  async function launchApp() {
     if (isInstalledPWA()) {
       window.location.href = "./app.html";
       return;
     }
     
-    openApp();
+    try {
+      if (!document.fullscreenElement &&
+        document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (error) {
+      console.log("Browser fullscreen unavailable");
+    }
+    
+    await openApp();
   }
   
   // Page Load check
@@ -355,8 +373,6 @@
     if (isInstalledPWA()) {
       installBtn.style.display = "none";
       window.location.href = "./app.html";
-    } else {
-      installBtn.style.display = "none";
     }
   });
   
@@ -390,16 +406,12 @@
     deferredPrompt = null;
   });
   
-  // Back Button Event: Jaise hi user back dabayega, yeh function overlay (home screen) wapas le aayega
+  // 🔑 Back Button Event: Jaise hi user back dabayega, yeh function overlay (home screen) wapas le aayega
   window.addEventListener("popstate", () => {
     document.body.classList.remove("in-landscape-mode");
     overlay.style.display = "flex";
     frame.style.display = "none";
     frame.src = "about:blank";
-    
-    if (isInstalledPWA()) {
-      installBtn.style.display = "none";
-    }
   });
   
   // Service Worker
