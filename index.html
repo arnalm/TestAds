@@ -20,6 +20,7 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
+
     * {
       margin: 0;
       padding: 0;
@@ -98,21 +99,12 @@
       border: 1px solid #6b7280;
     }
 
-    #main-frame {
-      display: none;
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      border: 0;
-      background: #000;
-    }
-
   </style>
 </head>
 
 <body>
+
+  <!-- Welcome Screen -->
 
   <div id="start-overlay">
 
@@ -125,6 +117,8 @@
       Ready to Play?
     </p>
 
+    <!-- Play Now: Normal Page Opening -->
+
     <a href="./app.html"
        style="text-decoration:none; width:240px; max-width:90%;">
 
@@ -134,134 +128,154 @@
 
     </a>
 
+    <!-- Install Button -->
+
     <button id="install-btn" type="button">
       📲 Install App
     </button>
 
-    <button class="secondary" type="button">
+    <!-- Share Button -->
+
+    <button class="secondary" id="share-btn" type="button">
       📤 Share App
     </button>
 
   </div>
 
-<script type="text/javascript" charset="utf-8">
-//____app install button code____
 
-let deferredPrompt = null;
+  <script>
 
-const installBtn = document.getElementById("install-btn");
+    // ==============================
+    // PWA INSTALL BUTTON
+    // ==============================
 
-// Check if PWA is installed
-function isInstalledPWA() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.matchMedia("(display-mode: fullscreen)").matches ||
-    window.navigator.standalone === true
-  );
-}
+    let deferredPrompt = null;
 
-// Check installation status
-function checkInstallStatus() {
-  if (isInstalledPWA()) {
-    installBtn.style.display = "none";
-  } else {
-    installBtn.style.display = "block";
-  }
-}
+    const installBtn = document.getElementById("install-btn");
 
-// Initial check
-checkInstallStatus();
+    function isInstalledPWA() {
 
-// Detect install availability
-window.addEventListener("beforeinstallprompt", (event) => {
-  event.preventDefault();
-
-  deferredPrompt = event;
-
-  checkInstallStatus();
-});
-
-// Install button
-installBtn.addEventListener("click", async () => {
-
-  if (deferredPrompt) {
-
-    deferredPrompt.prompt();
-
-    const result = await deferredPrompt.userChoice;
-
-    if (result.outcome === "accepted") {
-      installBtn.style.display = "none";
-    }
-
-    deferredPrompt = null;
-
-  } else {
-
-    alert(
-      "Android Chrome: 3 dots > Install App\n\n" +
-      "iPhone Safari: Share > Add to Home Screen"
-    );
-
-  }
-
-});
-
-// When app gets installed
-window.addEventListener("appinstalled", () => {
-  installBtn.style.display = "none";
-  deferredPrompt = null;
-});
-//_______shere button code_______ 
-
-
-const shareBtn = document.getElementById("share-btn");
-
-shareBtn.addEventListener("click", async () => {
-
-  const shareData = {
-    title: "TIME & TEL Game",
-    text: "🚚⛽ Play TIME & TEL Game! Try this amazing game!",
-    url: window.location.href
-  };
-
-  // Native mobile sharing
-  if (navigator.share) {
-
-    try {
-      await navigator.share(shareData);
-    } catch (error) {
-      console.log("Sharing cancelled");
-    }
-
-  } else {
-
-    // Fallback: Copy link
-    try {
-
-      await navigator.clipboard.writeText(
-        shareData.text + " " + shareData.url
+      return (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.matchMedia("(display-mode: fullscreen)").matches ||
+        window.navigator.standalone === true
       );
 
-      alert("Game link copied! Share it with your friends.");
+    }
 
-    } catch (error) {
+    function checkInstallStatus() {
 
-      prompt("Copy your game link:", shareData.url);
+      if (isInstalledPWA()) {
+
+        installBtn.style.display = "none";
+
+      } else {
+
+        installBtn.style.display = "block";
+
+      }
 
     }
 
-  }
+    checkInstallStatus();
 
-});
+    window.addEventListener("beforeinstallprompt", (event) => {
+
+      event.preventDefault();
+
+      deferredPrompt = event;
+
+      checkInstallStatus();
+
+    });
+
+    installBtn.addEventListener("click", async () => {
+
+      if (deferredPrompt) {
+
+        deferredPrompt.prompt();
+
+        const result = await deferredPrompt.userChoice;
+
+        if (result.outcome === "accepted") {
+
+          installBtn.style.display = "none";
+
+        }
+
+        deferredPrompt = null;
+
+      } else {
+
+        alert(
+          "Android Chrome: 3 dots > Install App\n\n" +
+          "iPhone Safari: Share > Add to Home Screen"
+        );
+
+      }
+
+    });
+
+    window.addEventListener("appinstalled", () => {
+
+      installBtn.style.display = "none";
+
+      deferredPrompt = null;
+
+    });
 
 
+    // ==============================
+    // SHARE APP BUTTON
+    // ==============================
 
+    const shareBtn = document.getElementById("share-btn");
 
-  
-</script>
+    shareBtn.addEventListener("click", async () => {
 
+      const shareData = {
 
+        title: "TIME & TEL Game",
+
+        text: "🚚⛽ Play TIME & TEL Game! Try this amazing game!",
+
+        url: window.location.href
+
+      };
+
+      if (navigator.share) {
+
+        try {
+
+          await navigator.share(shareData);
+
+        } catch (error) {
+
+          console.log("Sharing cancelled");
+
+        }
+
+      } else {
+
+        try {
+
+          await navigator.clipboard.writeText(
+            shareData.text + " " + shareData.url
+          );
+
+          alert("Game link copied! Share it with your friends.");
+
+        } catch (error) {
+
+          prompt("Copy your game link:", shareData.url);
+
+        }
+
+      }
+
+    });
+
+  </script>
 
 </body>
 </html>
