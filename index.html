@@ -406,7 +406,7 @@
     
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
-      deferredPrompt = fileEvent = event;
+      deferredPrompt = event;
       
       if (!isInstalledPWA() && installBtn) {
         installBtn.style.display = "block";
