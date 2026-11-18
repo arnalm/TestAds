@@ -2,7 +2,7 @@
 {
   "id": "./",
   "name": "My Fullscreen Landscape App",
-  "short_name": "My App",
+  "short_name": "Time & Tel",
   "description": "Fullscreen Landscape Application",
   "start_url": "./app.html",
   "scope": "./",
