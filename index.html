@@ -330,46 +330,49 @@
     );
   }
   
-  // Open actual app function with fresh iframe reset
+  // Helper to request fullscreen safely
+  async function triggerFullscreen() {
+    try {
+      const docEl = document.documentElement;
+      if (!document.fullscreenElement) {
+        if (docEl.requestFullscreen) {
+          await docEl.requestFullscreen();
+        } else if (docEl.webkitRequestFullscreen) {
+          await docEl.webkitRequestFullscreen();
+        }
+      }
+    } catch (error) {
+      console.log("Fullscreen restriction:", error);
+    }
+  }
+
+  // Open actual app function
   function openApp() {
     document.body.classList.add("in-landscape-mode");
     overlay.style.display = "none";
     
-    // Purana iframe clean karo taaki andar ki history wipe ho jaye
     frame.src = "about:blank";
     
-    // History state push karo
     if (window.location.hash !== "#game") {
       history.pushState({ view: "game" }, "", "#game");
     }
     
-    // Naya fresh app.html load karo
     setTimeout(() => {
       frame.src = "./app.html";
       frame.style.display = "block";
     }, 50);
   }
   
-  // Launch from welcome screen with Fullscreen & Landscape Lock
+  // Launch from welcome screen
   async function launchApp() {
     if (isInstalledPWA()) {
       window.location.href = "./app.html";
       return;
     }
     
-    // 1. Fullscreen Request
-    try {
-      const docEl = document.documentElement;
-      if (docEl.requestFullscreen) {
-        await docEl.requestFullscreen();
-      } else if (docEl.webkitRequestFullscreen) {
-        await docEl.webkitRequestFullscreen();
-      }
-    } catch (error) {
-      console.log("Fullscreen restriction:", error);
-    }
+    // Fullscreen aur Landscape Lock dono try karo
+    await triggerFullscreen();
     
-    // 2. Landscape Orientation Lock
     try {
       if (screen.orientation && screen.orientation.lock) {
         await screen.orientation.lock("landscape");
@@ -378,9 +381,16 @@
       console.log("Orientation lock restriction:", error);
     }
     
-    // 3. App Open karo
     openApp();
   }
+
+  // 🔄 **Auto Fullscreen on Screen Rotate (Landscape)**
+  window.addEventListener("resize", async () => {
+    // Agar mobile landscape mode mein rotate ho gaya hai aur game open hai
+    if (window.innerWidth > window.innerHeight && frame.style.display === "block") {
+      await triggerFullscreen();
+    }
+  });
   
   // Page Load check
   window.addEventListener("load", () => {
@@ -424,11 +434,11 @@
     deferredPrompt = null;
   });
   
-  // 🔑 100% Foolproof Back Button Handler
+  // Back Button Handler
   window.addEventListener("popstate", (event) => {
     document.body.classList.remove("in-landscape-mode");
     frame.style.display = "none";
-    frame.src = "about:blank"; // Iframe ko turant blank karke history clear karo
+    frame.src = "about:blank";
     overlay.style.display = "flex";
     
     if (window.location.hash !== "#home") {
