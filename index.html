@@ -20,6 +20,8 @@
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
       outline: none;
+      /* 🔑 Double-tap zoom ko rokne ke liye */
+      touch-action: manipulation;
     }
 
     html, body {
@@ -33,6 +35,7 @@
       border: 0;
       font-family: Arial, sans-serif;
       visibility: hidden; /* PWA flash rokne ke liye shuru mein hidden rahega */
+      touch-action: manipulation;
     }
 
     #start-overlay {
