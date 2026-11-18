@@ -11,17 +11,11 @@
   <title>TIME & TEL</title>
 
   <meta name="theme-color" content="#000000">
-
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style"
-        content="black-translucent">
-  <meta name="apple-mobile-web-app-title"
-        content="TIME & TEL">
+  <meta name="apple-mobile-web-app-title" content="TIME & TEL">
 
   <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon"
-        href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
 
@@ -37,8 +31,6 @@
       background: #000;
       font-family: Arial, sans-serif;
     }
-
-    /* Welcome Screen */
 
     #start-overlay {
       position: fixed;
@@ -107,7 +99,7 @@
       border: 1px solid #6b7280;
     }
 
-    /* Share Modal */
+    /* SHARE MODAL */
 
     #share-modal {
       display: none;
@@ -200,7 +192,7 @@
 
 <body>
 
-  <!-- Welcome Screen -->
+  <!-- WELCOME SCREEN -->
 
   <div id="start-overlay">
 
@@ -228,10 +220,9 @@
   </div>
 
 
-  <!-- Share Modal -->
+  <!-- SHARE MODAL -->
 
-  <div id="share-modal"
-       onclick="closeShareModal()">
+  <div id="share-modal" onclick="closeShareModal()">
 
     <div class="share-box"
          onclick="event.stopPropagation()">
@@ -283,7 +274,10 @@
     document.getElementById("share-modal");
 
 
-  // PLAY NOW: DIRECT OPEN APP.HTML
+  // DIRECT OPEN APP.HTML
+  // NO FULLSCREEN
+  // NO LANDSCAPE LOCK
+  // NO IFRAME
 
   function launchApp() {
 
@@ -292,7 +286,7 @@
   }
 
 
-  // SHARE APP MODAL
+  // SHARE MODAL
 
   function shareApp() {
 
@@ -353,10 +347,7 @@
 
       } catch (err) {
 
-        alert(
-          "Copy this link to share on Instagram:\n" +
-          shareUrl
-        );
+        alert("Share this link:\n" + shareUrl);
 
       }
 
@@ -393,7 +384,7 @@
 
           await navigator.clipboard.writeText(fullMessage);
 
-          alert("Game link copied to clipboard!");
+          alert("Game link copied!");
 
         } catch (err) {
 
@@ -410,35 +401,7 @@
   }
 
 
-  // CHECK INSTALLED PWA
-
-  function isInstalledPWA() {
-
-    return (
-      window.matchMedia(
-        "(display-mode: standalone)"
-      ).matches ||
-
-      window.navigator.standalone === true
-    );
-
-  }
-
-
-  // PAGE LOAD
-
-  window.addEventListener("load", () => {
-
-    if (isInstalledPWA()) {
-
-      installBtn.style.display = "none";
-
-    }
-
-  });
-
-
-  // INSTALLATION PROMPT
+  // PWA INSTALLATION
 
   window.addEventListener(
     "beforeinstallprompt",
@@ -447,12 +410,6 @@
       event.preventDefault();
 
       deferredPrompt = event;
-
-      if (!isInstalledPWA()) {
-
-        installBtn.style.display = "block";
-
-      }
 
     }
   );
@@ -488,8 +445,6 @@
   }
 
 
-  // APP INSTALLED
-
   window.addEventListener("appinstalled", () => {
 
     installBtn.style.display = "none";
@@ -515,10 +470,7 @@
 
       catch (error) {
 
-        console.error(
-          "Service Worker Error:",
-          error
-        );
+        console.error("Service Worker Error:", error);
 
       }
 
