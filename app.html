@@ -28,14 +28,67 @@
     touch-action: none;
     overscroll-behavior: none;
   }
+
+ /* Dark Transparent Background */
+  .offline-bg {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+  }
+
+  /* Simple White/Dark Card */
+  .offline-box {
+    background: #1e1e24;
+    color: #ffffff;
+    padding: 25px 20px;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 300px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  }
+
+  .offline-box h3 {
+    margin: 12px 0 8px 0;
+    font-size: 18px;
+  }
+
+  .offline-box p {
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: #cccccc;
+  }
+
+  /* Simple Clean Button */
+  .simple-btn {
+    background: #ff4757;
+    color: #ffffff;
+    border: none;
+    padding: 10px 28px;
+    font-size: 15px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .simple-btn:active {
+    background: #e0404e;
+  }
+   
 </style>
 </head>
 <body>
    <script>
-  // Page load hote hi turant body ko visible kar do
-  document.addEventListener("DOMContentLoaded", () => {
-    document.body.style.visibility = "visible";
-  });
+  
 
 
    
