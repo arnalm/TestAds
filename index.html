@@ -19,6 +19,7 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
+    /* 🛠️ Fix: - ki jagah * kiya gaya hai taaki CSS theek se apply ho */
     * {
       margin: 0;
       padding: 0;
@@ -349,7 +350,7 @@
       return;
     }
     
-    // 1. Fullscreen Request (Try-catch ke sath taaki error aane par bhi app chale)
+    // 1. Fullscreen Request
     try {
       const docEl = document.documentElement;
       if (docEl.requestFullscreen) {
@@ -361,7 +362,7 @@
       console.log("Fullscreen restriction:", error);
     }
     
-    // 2. Landscape Orientation Lock (Supported devices par turant lock karega)
+    // 2. Landscape Orientation Lock (Agar browser allow karega toh turant landscape ho jayega)
     try {
       if (screen.orientation && screen.orientation.lock) {
         await screen.orientation.lock("landscape");
@@ -412,7 +413,7 @@
     deferredPrompt = null;
   });
   
-  // 🔑 Back Button Handler
+  // 🔑 Back Button Handler (Mobile/Browser Back)
   window.addEventListener("popstate", (event) => {
     if (frame.style.display === "block") {
       document.body.classList.remove("in-landscape-mode");
