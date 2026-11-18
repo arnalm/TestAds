@@ -330,26 +330,26 @@
     );
   }
   
-  // Open actual app
+  // Open actual app function
   function openApp() {
     document.body.classList.add("in-landscape-mode");
     overlay.style.display = "none";
     
-    // History state push karein taaki back button detect ho sake
+    // History state push taaki back button detect ho sake
     history.pushState({ view: "game" }, "", "");
     
     frame.src = "./app.html";
     frame.style.display = "block";
   }
   
-  // Launch from welcome screen (Fullscreen + Landscape Lock)
+  // Launch from welcome screen with Fullscreen & Landscape Lock
   async function launchApp() {
     if (isInstalledPWA()) {
       window.location.href = "./app.html";
       return;
     }
     
-    // 1. Fullscreen request
+    // 1. Fullscreen Request (Try-catch ke sath taaki error aane par bhi app chale)
     try {
       const docEl = document.documentElement;
       if (docEl.requestFullscreen) {
@@ -358,19 +358,19 @@
         await docEl.webkitRequestFullscreen();
       }
     } catch (error) {
-      console.log("Fullscreen request failed or denied:", error);
+      console.log("Fullscreen restriction:", error);
     }
     
-    // 2. Landscape orientation lock
+    // 2. Landscape Orientation Lock (Supported devices par turant lock karega)
     try {
       if (screen.orientation && screen.orientation.lock) {
         await screen.orientation.lock("landscape");
       }
     } catch (error) {
-      console.log("Orientation lock failed or unavailable:", error);
+      console.log("Orientation lock restriction:", error);
     }
     
-    // 3. Open the actual app frame
+    // 3. App Open karo
     openApp();
   }
   
@@ -420,7 +420,7 @@
       frame.src = "about:blank";
       overlay.style.display = "flex";
       
-      // History stack balance rakhne ke liye
+      // History stack balance
       history.pushState(null, "", "");
     }
   });
