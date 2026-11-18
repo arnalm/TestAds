@@ -374,26 +374,23 @@
     openApp();
   }
 
-  // 🔄 **User Touch / Rotate par Fullscreen activate karne ke liye**
+  // 🔄 **Fullscreen exit hone par handle karna**
+  document.addEventListener("fullscreenchange", () => {
+    // Agar user ne game ke andar fullscreen se bahar aane ki koshish ki, 
+    // lekin game abhi bhi khula hai, toh hum check kar sakte hain. 
+    // Agar user w waqai back ana chahta hai, toh popstate sambhal lega.
+    if (!document.fullscreenElement && frame.style.display === "block") {
+      // Agar user ne sirf fullscreen cross kiya hai lekin game me hi hai, 
+      // toh hum ise ignore kar sakte hain ya wapas fullscreen daal sakte hain.
+    }
+  });
+
+  // Click par fullscreen maintain rakhne ke liye
   window.addEventListener("click", async () => {
     if (frame.style.display === "block" && !document.fullscreenElement) {
       await requestFullscreen();
     }
   });
-
-  if (screen.orientation) {
-    screen.orientation.addEventListener("change", async () => {
-      if (screen.orientation.type.includes("landscape") && frame.style.display === "block") {
-        await requestFullscreen();
-      }
-    });
-  } else {
-    window.addEventListener("resize", async () => {
-      if (window.innerWidth > window.innerHeight && frame.style.display === "block") {
-        await requestFullscreen();
-      }
-    });
-  }
   
   // Page Load check
   window.addEventListener("load", () => {
@@ -437,8 +434,13 @@
     deferredPrompt = null;
   });
   
-  // Back Button Handler
+  // 🔑 Back Button Handler (Jab user waqai game band karna chahega tabhi home par jayega)
   window.addEventListener("popstate", (event) => {
+    // Agar fullscreen active hai, toh pehle fullscreen band hone do ya seedha home jao
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    
     document.body.classList.remove("in-landscape-mode");
     frame.style.display = "none";
     frame.src = "about:blank";
