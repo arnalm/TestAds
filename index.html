@@ -279,7 +279,7 @@
   async function shareTo(platform) {
     const shareTitle = "TIME & TEL Game";
     const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
-    const shareUrl = window.location.href;
+    const shareUrl = window.location.href.split('#')[0];
     const fullMessage = `${shareText} ${shareUrl}`;
     
     if (platform === "whatsapp") {
@@ -330,23 +330,37 @@
     );
   }
   
-  // Open actual app
-  async function openApp() {
-    document.body.classList.add("in-landscape-mode");
-    overlay.style.display = "none";
-    frame.src = "./app.html";
-    frame.style.display = "block";
-    
-    // 🔑 Yahan history state push ki gayi hai taaki back button dabane par home page par aa sakein
-    history.pushState({ page: "game" }, "", "");
-    
+  // Fullscreen trigger function
+  async function requestFullscreen() {
     try {
-      if (screen.orientation && screen.orientation.lock) {
-        await screen.orientation.lock("landscape");
+      const docEl = document.documentElement;
+      if (!document.fullscreenElement) {
+        if (docEl.requestFullscreen) {
+          await docEl.requestFullscreen();
+        } else if (docEl.webkitRequestFullscreen) {
+          await docEl.webkitRequestFullscreen();
+        }
       }
     } catch (error) {
-      console.log("Landscape lock unavailable");
+      console.log("Fullscreen restriction:", error);
     }
+  }
+
+  // Open actual app function
+  function openApp() {
+    document.body.classList.add("in-landscape-mode");
+    overlay.style.display = "none";
+    
+    frame.src = "about:blank";
+    
+    if (window.location.hash !== "#game") {
+      history.pushState({ view: "game" }, "", "#game");
+    }
+    
+    setTimeout(() => {
+      frame.src = "./app.html";
+      frame.style.display = "block";
+    }, 50);
   }
   
   // Launch from welcome screen
@@ -356,16 +370,24 @@
       return;
     }
     
-    try {
-      if (!document.fullscreenElement &&
-        document.documentElement.requestFullscreen) {
-        await document.documentElement.requestFullscreen();
+    await requestFullscreen();
+    openApp();
+  }
+
+  // 🔄 **Auto Fullscreen jab phone rotate (Landscape) ho**
+  if (screen.orientation) {
+    screen.orientation.addEventListener("change", async () => {
+      if (screen.orientation.type.includes("landscape") && frame.style.display === "block") {
+        await requestFullscreen();
       }
-    } catch (error) {
-      console.log("Browser fullscreen unavailable");
-    }
-    
-    await openApp();
+    });
+  } else {
+    // Fallback for older browsers using window resize
+    window.addEventListener("resize", async () => {
+      if (window.innerWidth > window.innerHeight && frame.style.display === "block") {
+        await requestFullscreen();
+      }
+    });
   }
   
   // Page Load check
@@ -373,6 +395,10 @@
     if (isInstalledPWA()) {
       installBtn.style.display = "none";
       window.location.href = "./app.html";
+    } else {
+      if (!window.location.hash || window.location.hash === "#game") {
+        history.replaceState({ view: "home" }, "", "#home");
+      }
     }
   });
   
@@ -406,14 +432,18 @@
     deferredPrompt = null;
   });
   
-  // 🔑 Back Button Event: Jaise hi user back dabayega, yeh function overlay (home screen) wapas le aayega
-  window.addEventListener("popstate", () => {
+  // Back Button Handler
+  window.addEventListener("popstate", (event) => {
     document.body.classList.remove("in-landscape-mode");
-    overlay.style.display = "flex";
     frame.style.display = "none";
     frame.src = "about:blank";
+    overlay.style.display = "flex";
+    
+    if (window.location.hash !== "#home") {
+      history.replaceState({ view: "home" }, "", "#home");
+    }
   });
-  
+
   // Service Worker
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
