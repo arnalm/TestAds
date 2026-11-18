@@ -1,7 +1,7 @@
 
 {
   "id": "./",
-  "name": "My Fullscreen Landscape App",
+  "name": "No internet connection" ,
   "short_name": "Time & Tel",
   "description": "Fullscreen Landscape Application",
   "start_url": "./app.html",
