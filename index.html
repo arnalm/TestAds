@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,43 +7,37 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-  <title>My Fullscreen App</title>
+  <title>TIME & TEL</title>
 
   <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="My App">
+  <meta name="apple-mobile-web-app-title" content="TIME & TEL">
 
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    html,
-    body {
+    html, body {
       width: 100%;
       height: 100%;
       height: 100dvh;
       overflow: hidden;
       background: #000;
-      border: none;
-      outline: none;
       font-family: Arial, sans-serif;
     }
 
     #start-overlay {
       position: fixed;
       inset: 0;
-      width: 100%;
-      height: 100%;
-      background: #111;
+      background: radial-gradient(circle at top, #374151, #111827 70%);
       color: white;
       display: flex;
       flex-direction: column;
@@ -52,26 +45,123 @@
       align-items: center;
       z-index: 9999;
       text-align: center;
+      padding: 20px;
+    }
+
+    .logo {
+      font-size: 65px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      color: #fbbf24;
+      font-size: 38px;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      color: #d1d5db;
+      line-height: 1.6;
+      margin-bottom: 20px;
     }
 
     button {
       width: 240px;
       max-width: 90%;
-      padding: 15px;
-      margin-top: 15px;
+      padding: 14px;
+      margin-top: 12px;
       border: none;
-      border-radius: 8px;
-      color: white;
-      font-size: 18px;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: bold;
       cursor: pointer;
     }
 
+    button:active {
+      transform: scale(.96);
+    }
+
     #start-btn {
-      background: #ff5722;
+      background: #fbbf24;
+      color: #111827;
     }
 
     #install-btn {
-      background: #2e7d32;
+      background: #16a34a;
+      color: white;
+    }
+
+    .secondary {
+      background: #374151;
+      color: white;
+      border: 1px solid #6b7280;
+    }
+
+    /* Share Modal Styling */
+    #share-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      z-index: 10002;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .share-box {
+      background: #1f2937;
+      border: 1px solid #4b5563;
+      border-radius: 16px;
+      padding: 22px;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .share-box h3 {
+      color: #fbbf24;
+      margin-bottom: 16px;
+      font-size: 20px;
+    }
+
+    .share-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .share-opt-btn {
+      width: 100%;
+      max-width: none;
+      margin-top: 0;
+      padding: 12px 8px;
+      font-size: 14px;
+      border-radius: 10px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-wa { background: #25D366; color: #0b141a; }
+    .btn-fb { background: #1877F2; }
+    .btn-ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .btn-other { background: #4b5563; }
+
+    .close-share-btn {
+      width: 100%;
+      max-width: none;
+      padding: 10px;
+      margin-top: 4px;
+      background: transparent;
+      border: 1px solid #6b7280;
+      color: #d1d5db;
+      font-size: 14px;
     }
 
     #main-frame {
@@ -82,7 +172,6 @@
       height: 100%;
       height: 100dvh;
       border: 0;
-      outline: none;
       background: #000;
     }
 
@@ -105,7 +194,6 @@
         display: flex;
       }
     }
-
   </style>
 </head>
 
@@ -118,18 +206,50 @@
     </p>
   </div>
 
+  <!-- Welcome Screen -->
   <div id="start-overlay">
+    <div class="logo">🚚⛽</div>
 
-    <h2>Welcome to My App</h2>
+    <h1>TIME & TEL</h1>
+
+    <p class="subtitle">
+      Welcome to Time & Tel Game!<br>
+      Ready to Play?
+    </p>
 
     <button id="start-btn" onclick="launchApp()">
-      Start App
+      ▶ Play Now
     </button>
-
+ 
     <button id="install-btn" onclick="installPWA()">
       📲 Install App
     </button>
+ 
+    <button class="secondary" onclick="shareApp()">
+      📤 Share App
+    </button>
+  </div>
 
+  <!-- Share Options Modal -->
+  <div id="share-modal" onclick="closeShareModal(event)">
+    <div class="share-box" onclick="event.stopPropagation()">
+      <h3>📤 Share Game</h3>
+      <div class="share-options">
+        <button class="share-opt-btn btn-wa" onclick="shareTo('whatsapp')">
+          💬 WhatsApp
+        </button>
+        <button class="share-opt-btn btn-fb" onclick="shareTo('facebook')">
+          📘 Facebook
+        </button>
+        <button class="share-opt-btn btn-ig" onclick="shareTo('instagram')">
+          📸 Instagram
+        </button>
+        <button class="share-opt-btn btn-other" onclick="shareTo('other')">
+          🔗 Other
+        </button>
+      </div>
+      <button class="close-share-btn" onclick="closeShareModal()">Cancel</button>
+    </div>
   </div>
 
   <iframe
@@ -140,164 +260,162 @@
   </iframe>
 
   <script>
-
     let deferredPrompt = null;
 
     const overlay = document.getElementById("start-overlay");
     const frame = document.getElementById("main-frame");
     const installBtn = document.getElementById("install-btn");
+    const shareModal = document.getElementById("share-modal");
+
+    // Share App Modal Functions
+    function shareApp() {
+      shareModal.style.display = "flex";
+    }
+
+    function closeShareModal() {
+      shareModal.style.display = "none";
+    }
+
+    async function shareTo(platform) {
+      const shareTitle = "TIME & TEL Game";
+      const shareText = "🚚⛽ Play TIME & TEL Game! Check it out here:";
+      const shareUrl = window.location.href;
+      const fullMessage = `${shareText} ${shareUrl}`;
+
+      if (platform === "whatsapp") {
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`, "_blank");
+      } 
+      else if (platform === "facebook") {
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, "_blank");
+      } 
+      else if (platform === "instagram") {
+        // Instagram direct URL share support nahi karta, isliye link copy karke Instagram open karega
+        try {
+          await navigator.clipboard.writeText(fullMessage);
+          alert("Link copied! Opening Instagram—paste it in your Story, Bio, or DM.");
+        } catch (err) {
+          alert("Copy this link to share on Instagram:\n" + shareUrl);
+        }
+        window.open("https://www.instagram.com/", "_blank");
+      } 
+      else if (platform === "other") {
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: shareTitle,
+              text: shareText,
+              url: shareUrl
+            });
+          } catch (err) {
+            console.log("Share cancelled");
+          }
+        } else {
+          try {
+            await navigator.clipboard.writeText(fullMessage);
+            alert("Game link copied to clipboard!");
+          } catch (err) {
+            alert("Share this link:\n" + shareUrl);
+          }
+        }
+      }
+
+      closeShareModal();
+    }
 
     // Check installed PWA
     function isInstalledPWA() {
-
       return (
         window.matchMedia("(display-mode: fullscreen)").matches ||
         window.matchMedia("(display-mode: standalone)").matches ||
         window.navigator.standalone === true
       );
-
     }
 
     // Open actual app
     async function openApp() {
-
       document.body.classList.add("in-landscape-mode");
-
       overlay.style.display = "none";
-
       frame.src = "./app.html";
       frame.style.display = "block";
 
-      // Lock landscape where supported
       try {
-
         if (screen.orientation && screen.orientation.lock) {
           await screen.orientation.lock("landscape");
         }
-
       } catch (error) {
-
         console.log("Landscape lock unavailable");
-
       }
-
     }
 
     // Launch from welcome screen
     async function launchApp() {
-
       try {
-
         if (!document.fullscreenElement &&
             document.documentElement.requestFullscreen) {
-
           await document.documentElement.requestFullscreen();
-
         }
-
       } catch (error) {
-
         console.log("Browser fullscreen unavailable");
-
       }
 
       await openApp();
-
     }
 
     // Automatically open app when installed PWA launches
     window.addEventListener("load", () => {
-
       if (isInstalledPWA()) {
-
         installBtn.style.display = "none";
-
         openApp();
-
       }
-
     });
 
     // Installation prompt
     window.addEventListener("beforeinstallprompt", (event) => {
-
       event.preventDefault();
-
       deferredPrompt = event;
-
       installBtn.style.display = "block";
-
     });
 
     async function installPWA() {
-
       if (deferredPrompt) {
-
         deferredPrompt.prompt();
-
         const result = await deferredPrompt.userChoice;
-
         if (result.outcome === "accepted") {
-
           installBtn.style.display = "none";
-
         }
-
         deferredPrompt = null;
-
       } else {
-
         alert(
           "Android Chrome: 3 dots > Install app\n\n" +
           "iPhone Safari: Share > Add to Home Screen"
         );
-
       }
-
     }
 
     window.addEventListener("appinstalled", () => {
-
       installBtn.style.display = "none";
-
       deferredPrompt = null;
-
     });
 
     // Back button
     window.addEventListener("popstate", () => {
-
       document.body.classList.remove("in-landscape-mode");
-
       overlay.style.display = "flex";
-
       frame.style.display = "none";
-
       frame.src = "about:blank";
-
     });
 
     // Service Worker
     if ("serviceWorker" in navigator) {
-
       window.addEventListener("load", async () => {
-
         try {
-
           await navigator.serviceWorker.register("./sw.js");
-
           console.log("Service Worker Registered");
-
         } catch (error) {
-
           console.error("Service Worker Error:", error);
-
         }
-
       });
-
     }
-
   </script>
 
 </body>
