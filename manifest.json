@@ -3,7 +3,7 @@
   "short_name": "My PWA",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#2563eb",
   "theme_color": "#2563eb",
