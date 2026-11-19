@@ -4,7 +4,7 @@
   "description": "Play TIME & TEL Game anytime, even offline.",
   "start_url": "./index.html",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#111827",
   "theme_color": "#000000",
