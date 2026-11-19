@@ -2,7 +2,7 @@
   "name": "TIME & TEL",
   "short_name": "TIME & TEL",
   "description": "Play TIME & TEL Game anytime, even offline.",
-  "start_url": "./index.html",
+  "start_url": "./index.html?fullscreen=true",
   "scope": "./",
   "display": "fullscreen",
   "orientation": "landscape",
