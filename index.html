@@ -2,22 +2,15 @@
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
-  <!-- स्क्रीन के कोनों और नॉच को पूरी तरह कवर करने के लिए -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  
   <title>My Landscape PWA</title>
-  
-  <!-- मेनिफेस्ट फ़ाइल को जोड़ें -->
   <link rel="manifest" href="manifest.json">
-  
-  <!-- Android और iOS पर टॉप बार को गायब/मैच करने के लिए -->
   <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <style>
-    /* डिफ़ॉल्ट मार्जिन और टॉप बॉर्डर हटाने की सेटिंग */
     * {
       margin: 0;
       padding: 0;
@@ -26,13 +19,11 @@
 
     html, body {
       width: 100vw;
-      height: 100dvh; /* लैंडस्केप में पूरी ऊंचाई के लिए */
+      height: 100dvh;
       overflow: hidden;
-      background-color: #000000; /* अपने ऐप का बैकग्राउंड रंग रखें */
+      background-color: #000000;
       color: #ffffff;
       font-family: sans-serif;
-      
-      /* लैंडस्केप में साइड के कैमरा नॉच से कंटेंट बचाने के लिए */
       padding-left: env(safe-area-inset-left);
       padding-right: env(safe-area-inset-right);
     }
@@ -44,6 +35,25 @@
       justify-content: center;
       align-items: center;
       flex-direction: column;
+      gap: 20px;
+    }
+
+    /* डाउनलोड बटन का डिज़ाइन */
+    #installBtn {
+      display: none; /* शुरुआत में छिपा रहेगा, इंस्टॉल होने लायक होने पर ही दिखेगा */
+      padding: 12px 28px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #000000;
+      background-color: #00e676; /* हरा रंग */
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 230, 118, 0.4);
+    }
+
+    #installBtn:active {
+      transform: scale(0.95);
     }
   </style>
 </head>
@@ -52,17 +62,50 @@
   <div class="app-container">
     <h1>मेरा फुल-स्क्रीन PWA ऐप</h1>
     <p>यहाँ अपना कोड या कंटेंट लिखें</p>
+    
+    <!-- ऐप इंस्टॉल करने का बटन -->
+    <button id="installBtn">📥 ऐप डाउनलोड करें</button>
   </div>
 
-  <!-- Service Worker को रजिस्टर करने का कोड -->
   <script>
+    // 1. Service Worker रजिस्टर करें
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker Registered!'))
-          .catch(err => console.log('Service Worker Error:', err));
+          .then(reg => console.log('SW Registered'))
+          .catch(err => console.log('SW Error:', err));
       });
     }
+
+    // 2. कस्टम Download/Install बटन का लॉजिक
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    // जब ब्राउज़र ऐप इंस्टॉल करने के लिए तैयार हो
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault(); // डिफ़ॉल्ट मिनी-इन्फोबार को रोकें
+      deferredPrompt = e; // इवेंट को सेव करें
+      installBtn.style.display = 'block'; // बटन को स्क्रीन पर दिखाएं
+    });
+
+    // बटन पर क्लिक करने पर इंस्टॉल पॉपअप खोलें
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt(); // इंस्टॉल पॉपअप दिखाएं
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('User ne app install kar liya');
+          installBtn.style.display = 'none'; // इंस्टॉल होने के बाद बटन छुपा दें
+        }
+        deferredPrompt = null;
+      }
+    });
+
+    // अगर ऐप पहले से इंस्टॉल है या अभी इंस्टॉल हुआ है तो बटन छुपा दें
+    window.addEventListener('appinstalled', () => {
+      installBtn.style.display = 'none';
+      deferredPrompt = null;
+    });
   </script>
 
 </body>
