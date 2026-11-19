@@ -1,272 +1,406 @@
+
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta charset="UTF-8">
 
-    <meta name="theme-color" content="#000000">
-    <meta name="description" content="Fullscreen Landscape PWA">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
-    
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" href="./icons/icon-192.png">
 
-    <title>Fullscreen App</title>
+<title>Fullscreen PWA</title>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+<style>
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #000000;
-            color: #ffffff;
-            border: none;
-            outline: none;
-            font-family: Arial, sans-serif;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-        body {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
-        }
+html, body {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    color: white;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
 
-        #app {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            height: 100dvh;
-            background: #000000;
-            overflow: hidden;
-            border: none;
-            outline: none;
+body {
+    position: fixed;
+    inset: 0;
+}
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+#app {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
 
-        .main {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-        }
+    background: #000;
 
-        h1 {
-            font-size: clamp(24px, 5vw, 50px);
-            margin-bottom: 15px;
-        }
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-        p {
-            font-size: clamp(14px, 2vw, 20px);
-            color: #bbbbbb;
-            margin-bottom: 25px;
-        }
+    overflow: hidden;
+}
 
-        button {
-            padding: 14px 28px;
-            background: #ffffff;
-            color: #000000;
-            border: none;
-            border-radius: 10px;
-            font-size: 17px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+.container {
+    width: 100%;
+    max-width: 700px;
+    padding: 20px;
 
-        button:active {
-            transform: scale(0.96);
-        }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
-        #installBtn {
-            display: none;
-        }
+    text-align: center;
+    gap: 18px;
+}
 
-        #status {
-            margin-top: 20px;
-            font-size: 13px;
-            color: #888888;
-        }
+.logo {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+}
 
-        /* Portrait me landscape karne ka message */
-        #rotateMessage {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: #000000;
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 25px;
-        }
+h1 {
+    font-size: clamp(22px, 4vw, 38px);
+}
 
-        @media (orientation: portrait) {
-            #rotateMessage {
-                display: flex;
-            }
-        }
+.subtitle {
+    color: #aaa;
+    font-size: 15px;
+}
 
-        /* Top border/header nahi */
-        header, nav, footer {
-            border: none !important;
-        }
-    </style>
+/* BUTTON CONTAINER */
+
+.buttons {
+    width: 100%;
+    max-width: 350px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* BUTTON STYLE */
+
+.btn {
+    width: 100%;
+    min-height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 14px;
+
+    font-size: 17px;
+    font-weight: bold;
+
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+/* INSTALL BUTTON */
+
+.install-btn {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* FULLSCREEN BUTTON */
+
+.fullscreen-btn {
+    background: #222222;
+    color: #ffffff;
+    border: 1px solid #555;
+}
+
+/* BUTTON PRESS */
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+/* STATUS */
+
+#status {
+    font-size: 13px;
+    color: #888;
+    min-height: 20px;
+}
+
+/* ROTATE MESSAGE */
+
+#rotateMessage {
+    display: none;
+
+    position: fixed;
+    inset: 0;
+
+    z-index: 99999;
+
+    background: #000;
+    color: white;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    padding: 20px;
+}
+
+@media (orientation: portrait) {
+    #rotateMessage {
+        display: flex;
+    }
+}
+
+/* LANDSCAPE SMALL SCREEN */
+
+@media (orientation: landscape) and (max-height: 450px) {
+
+    .container {
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+
+    .subtitle {
+        font-size: 12px;
+    }
+
+    .buttons {
+        flex-direction: row;
+        max-width: 500px;
+        gap: 10px;
+    }
+
+    .btn {
+        min-height: 48px;
+        font-size: 14px;
+    }
+}
+
+</style>
 </head>
 
 <body>
 
-    <div id="app">
-        <div class="main">
+<div id="app">
 
-            <h1>My Fullscreen App</h1>
+    <div class="container">
 
-            <p>Landscape Fullscreen PWA</p>
+        <img
+            src="./icons/icon-192.png"
+            class="logo"
+            alt="App Icon"
+        >
 
-            <button id="installBtn">
-                Install App
+        <h1>Fullscreen App</h1>
+
+        <div class="subtitle">
+            Landscape PWA
+        </div>
+
+        <div class="buttons">
+
+            <button
+                id="installBtn"
+                class="btn install-btn"
+                style="display:none"
+            >
+                📲 Install App
             </button>
 
-            <button id="fullscreenBtn">
-                Fullscreen
+            <button
+                id="fullscreenBtn"
+                class="btn fullscreen-btn"
+            >
+                ⛶ Full Screen
             </button>
 
-            <div id="status">
-                App Ready
-            </div>
-
         </div>
+
+        <div id="status">
+            Ready
+        </div>
+
     </div>
 
-    <div id="rotateMessage">
-        <div>
-            <h2>Please Rotate Your Phone</h2>
-            <p>App landscape mode me use karein.</p>
-        </div>
+</div>
+
+<div id="rotateMessage">
+    <div>
+        <h2>Please Rotate Your Device</h2>
+        <p>Landscape mode me phone use karein.</p>
     </div>
+</div>
 
-    <script>
-        // PWA INSTALL
-        let deferredPrompt = null;
+<script>
 
-        const installBtn = document.getElementById("installBtn");
-        const status = document.getElementById("status");
+// INSTALL APP
 
-        window.addEventListener("beforeinstallprompt", (event) => {
-            event.preventDefault();
-            deferredPrompt = event;
+let deferredPrompt;
 
-            installBtn.style.display = "block";
-            status.textContent = "App install karne ke liye button dabayein";
-        });
+const installBtn = document.getElementById("installBtn");
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+const status = document.getElementById("status");
 
-        installBtn.addEventListener("click", async () => {
-            if (!deferredPrompt) {
-                status.textContent = "Browser menu se Add to Home Screen karein";
-                return;
+window.addEventListener("beforeinstallprompt", (e) => {
+
+    e.preventDefault();
+
+    deferredPrompt = e;
+
+    installBtn.style.display = "flex";
+
+    status.textContent = "App install karne ke liye click karein";
+
+});
+
+// INSTALL BUTTON CLICK
+
+installBtn.addEventListener("click", async () => {
+
+    if (!deferredPrompt) {
+
+        status.textContent =
+        "Chrome menu ⋮ se Install App select karein";
+
+        return;
+    }
+
+    deferredPrompt.prompt();
+
+    const result = await deferredPrompt.userChoice;
+
+    if (result.outcome === "accepted") {
+        status.textContent = "Installing App...";
+    } else {
+        status.textContent = "Installation cancelled";
+    }
+
+    deferredPrompt = null;
+
+    installBtn.style.display = "none";
+
+});
+
+// INSTALLED EVENT
+
+window.addEventListener("appinstalled", () => {
+
+    installBtn.style.display = "none";
+
+    status.textContent = "App Installed Successfully";
+
+});
+
+// FULLSCREEN
+
+fullscreenBtn.addEventListener("click", async () => {
+
+    try {
+
+        if (!document.fullscreenElement) {
+
+            await document.documentElement.requestFullscreen();
+
+            if (screen.orientation &&
+                screen.orientation.lock) {
+
+                await screen.orientation.lock("landscape");
             }
 
-            deferredPrompt.prompt();
+            fullscreenBtn.textContent = "⛶ Exit Full Screen";
 
-            const result = await deferredPrompt.userChoice;
+            status.textContent = "Fullscreen Enabled";
 
-            if (result.outcome === "accepted") {
-                status.textContent = "App install ho raha hai...";
-            } else {
-                status.textContent = "Installation cancel ho gaya";
-            }
+        } else {
 
-            deferredPrompt = null;
-            installBtn.style.display = "none";
+            await document.exitFullscreen();
+
+            fullscreenBtn.textContent = "⛶ Full Screen";
+
+            status.textContent = "Fullscreen Disabled";
+        }
+
+    } catch (error) {
+
+        status.textContent =
+        "Fullscreen browser support nahi karta";
+
+    }
+
+});
+
+// FULLSCREEN CHANGE
+
+document.addEventListener("fullscreenchange", () => {
+
+    if (!document.fullscreenElement) {
+        fullscreenBtn.textContent = "⛶ Full Screen";
+    }
+
+});
+
+// PWA DETECT
+
+const isPWA =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.matchMedia("(display-mode: fullscreen)").matches ||
+    window.navigator.standalone === true;
+
+if (isPWA) {
+
+    installBtn.style.display = "none";
+
+    status.textContent = "Installed App Mode";
+
+}
+
+// SERVICE WORKER
+
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", () => {
+
+        navigator.serviceWorker.register("./sw.js")
+        .then(() => {
+            console.log("Service Worker Ready");
+        })
+        .catch((err) => {
+            console.error(err);
         });
 
-        // INSTALL SUCCESS
-        window.addEventListener("appinstalled", () => {
-            status.textContent = "App successfully install ho gaya!";
-            installBtn.style.display = "none";
-        });
+    });
 
-        // FULLSCREEN BUTTON
-        document.getElementById("fullscreenBtn")
-            .addEventListener("click", async () => {
-                try {
-                    if (!document.fullscreenElement) {
-                        await document.documentElement.requestFullscreen();
+}
 
-                        if (screen.orientation &&
-                            screen.orientation.lock) {
-                            await screen.orientation.lock("landscape");
-                        }
-
-                        status.textContent = "Fullscreen enabled";
-                    } else {
-                        await document.exitFullscreen();
-                    }
-                } catch (error) {
-                    status.textContent =
-                        "Fullscreen browser se supported nahi hai";
-                }
-            });
-
-        // LANDSCAPE ORIENTATION
-        async function lockLandscape() {
-            try {
-                if (screen.orientation &&
-                    screen.orientation.lock) {
-                    await screen.orientation.lock("landscape");
-                }
-            } catch (error) {
-                // Device orientation lock unsupported
-            }
-        }
-
-        // PWA DETECTION
-        const isInstalled =
-            window.matchMedia("(display-mode: standalone)").matches ||
-            window.matchMedia("(display-mode: fullscreen)").matches ||
-            window.navigator.standalone === true;
-
-        if (isInstalled) {
-            installBtn.style.display = "none";
-            status.textContent = "Installed App Mode";
-            lockLandscape();
-        }
-
-        // SERVICE WORKER
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", () => {
-                navigator.serviceWorker.register("./sw.js")
-                    .then(() => {
-                        console.log("Service Worker Registered");
-                    })
-                    .catch((error) => {
-                        console.log("Service Worker Error:", error);
-                    });
-            });
-        }
-    </script>
+</script>
 
 </body>
 </html>
