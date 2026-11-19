@@ -109,7 +109,11 @@
   <button id="install-btn" type="button">
     📲 Install App
   </button>
-
+<!-- इसे अपने ऐप में सबसे ऊपर लगा दें -->
+<button onclick="document.documentElement.requestFullscreen()" style="padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 5px;">
+  ⛶ Full Screen करें
+</button>
+  
   <script type="text/javascript" charset="utf-8">
     //____1. Service Worker Registration____
     if ("serviceWorker" in navigator) {
