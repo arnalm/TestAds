@@ -1,258 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="hi">
 <head>
   <meta charset="UTF-8">
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-
-  <title>TIME & TEL</title>
-<meta name="theme-color" content="#1E293B" />
+  <!-- स्क्रीन के कोनों और नॉच को पूरी तरह कवर करने के लिए -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
+  <title>My Landscape PWA</title>
+  
+  <!-- मेनिफेस्ट फ़ाइल को जोड़ें -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Android और iOS पर टॉप बार को गायब/मैच करने के लिए -->
+  <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="TIME & TEL">
-
-  <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
-    
+    /* डिफ़ॉल्ट मार्जिन और टॉप बॉर्डर हटाने की सेटिंग */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
+      width: 100vw;
+      height: 100dvh; /* लैंडस्केप में पूरी ऊंचाई के लिए */
+      overflow: hidden;
+      background-color: #000000; /* अपने ऐप का बैकग्राउंड रंग रखें */
+      color: #ffffff;
+      font-family: sans-serif;
+      
+      /* लैंडस्केप में साइड के कैमरा नॉच से कंटेंट बचाने के लिए */
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    .app-container {
       width: 100%;
-      min-height: 100vh; /* height की जगह min-height ताकि बटन न कटे */
-      background:#1E293B ;
-      text-align: center;
-      padding: 20px 10px 40px 10px;
-      boder:1px solid green;
-    }
-
-    .logo {
-      font-size: 65px;
-      margin-top: 15px;
-      margin-bottom: 12px;
-    }
-
-    h1 {
-      color: #fbbf24;
-      font-size: 38px;
-      margin-bottom: 12px;
-    }
-
-    .subtitle {
-      color: #d1d5db;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-
-    button {
-      display: block;
-      width: 240px;
-      max-width: 90%;
-      padding: 14px;
-      margin: 12px auto 0 auto;
-      border: none;
-      border-radius: 10px;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:active {
-      transform: scale(.96);
-    }
-
-    #fullscreen-btn {
-      background: #007bff;
-      color: white;
-      padding: 10px 15px;
-      font-size: 15px;
-      margin-bottom: 15px;
-    }
-
-    #start-btn {
-      background: #fbbf24;
-      color: #111827;
-    }
-
-    #install-btn {
-      display: none;
-      background: #16a34a;
-      color: white;
-    }
-
-    .secondary {
-      background: #374151;
-      color: white;
-      border: 1px solid #6b7280;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
     }
   </style>
 </head>
-
 <body>
 
-  
-  <button id="fullscreen-btn" type="button" onclick="toggleFullScreen()">
-    ⛶ Full Screen 
-  </button>
+  <div class="app-container">
+    <h1>मेरा फुल-स्क्रीन PWA ऐप</h1>
+    <p>यहाँ अपना कोड या कंटेंट लिखें</p>
+  </div>
 
-  <div class="logo">🚚⛽</div>
-
-  <h1>TIME & TEL</h1>
-
-  <p class="subtitle">
-    Welcome to Time & Tel Game!<br>
-    Ready to Play?
-  </p>
-
-  <a href="./app.html" style="text-decoration:none; display:block;">
-    <button id="start-btn" type="button">
-      ▶ Play Now
-    </button>
-  </a>
-
-  <button id="share-btn" class="secondary" type="button">
-    📤 Share App
-  </button>
-
-  <button id="install-btn" type="button">
-    📲 Install App
-  </button>
-  
-  <script type="text/javascript" charset="utf-8">
-    //____0. Full Screen Function____
-    function toggleFullScreen() {
-      const elem = document.documentElement;
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (elem.requestFullscreen) {
-          elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) { /* Safari / iPhone सपोर्ट के लिए */
-          elem.webkitRequestFullscreen();
-        }
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
-      }
-    }
-
-    //____1. Service Worker Registration____
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js")
-          .then((reg) => {
-            console.log("Service Worker registered:", reg.scope);
-          })
-          .catch((err) => {
-            console.error("Service Worker registration failed:", err);
-          });
+  <!-- Service Worker को रजिस्टर करने का कोड -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker Registered!'))
+          .catch(err => console.log('Service Worker Error:', err));
       });
     }
-
-    //____2. App Install Button Code (Hide if already installed)____
-    let deferredPrompt = null;
-    const installBtn = document.getElementById("install-btn");
-
-    function isRunningAsInstalledPWA() {
-      return (
-        window.matchMedia("(display-mode: standalone)").matches ||
-        window.matchMedia("(display-mode: fullscreen)").matches ||
-        window.matchMedia("(display-mode: minimal-ui)").matches ||
-        window.navigator.standalone === true ||
-        document.referrer.includes("android-app://")
-      );
-    }
-
-    async function hasRelatedInstalledApp() {
-      if ("getInstalledRelatedApps" in navigator) {
-        try {
-          const relatedApps = await navigator.getInstalledRelatedApps();
-          return Array.isArray(relatedApps) && relatedApps.length > 0;
-        } catch (err) {
-          return false;
-        }
-      }
-      return false;
-    }
-
-    async function updateInstallButtonVisibility() {
-      if (isRunningAsInstalledPWA() || await hasRelatedInstalledApp()) {
-        installBtn.style.display = "none";
-        return;
-      }
-
-      if (deferredPrompt) {
-        installBtn.style.display = "block";
-      } else {
-        installBtn.style.display = "none";
-      }
-    }
-
-    updateInstallButtonVisibility();
-
-    window.matchMedia("(display-mode: standalone)").addEventListener("change", updateInstallButtonVisibility);
-
-    window.addEventListener("beforeinstallprompt", async (event) => {
-      event.preventDefault();
-      deferredPrompt = event;
-      await updateInstallButtonVisibility();
-    });
-
-    installBtn.addEventListener("click", async () => {
-      if (!deferredPrompt) return;
-
-      deferredPrompt.prompt();
-      const result = await deferredPrompt.userChoice;
-
-      if (result.outcome === "accepted") {
-        installBtn.style.display = "none";
-      }
-
-      deferredPrompt = null;
-    });
-
-    window.addEventListener("appinstalled", () => {
-      installBtn.style.display = "none";
-      deferredPrompt = null;
-    });
-
-    //____3. Share Button Code____
-    const shareBtn = document.getElementById("share-btn");
-
-    shareBtn.addEventListener("click", async () => {
-      const shareData = {
-        title: "TIME & TEL Game",
-        text: "🚚⛽ Play TIME & TEL Game! Try this amazing game!",
-        url: window.location.href
-      };
-
-      if (navigator.share) {
-        try {
-          await navigator.share(shareData);
-        } catch (error) {
-          console.log("Sharing cancelled");
-        }
-      } else {
-        try {
-          await navigator.clipboard.writeText(
-            shareData.text + " " + shareData.url
-          );
-          alert("Game link copied! Share it with your friends.");
-        } catch (error) {
-          prompt("Copy your game link:", shareData.url);
-        }
-      }
-    });
   </script>
 
 </body>
