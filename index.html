@@ -3,8 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  
-  <!-- Full-Screen और Mobile App Settings -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -28,20 +26,23 @@
       justify-content: center;
       overflow: hidden;
       text-align: center;
+      padding: 20px;
     }
     #installBtn {
-      display: none;
-      margin-top: 20px;
-      padding: 12px 28px;
+      display: inline-block; /* बटन हमेशा दिखेगा */
+      margin-top: 25px;
+      padding: 14px 32px;
       font-size: 18px;
       font-weight: bold;
       background-color: #00c853;
       color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 200, 83, 0.4);
     }
-    /* पोर्ट्रेट मोड में स्क्रीन घुमाने का संदेश (iOS/ब्राउज़र के लिए) */
+    #installBtn:active { transform: scale(0.96); }
+    
     #rotateMessage {
       display: none;
       position: fixed;
@@ -61,52 +62,61 @@
 </head>
 <body>
 
-  <!-- अगर फ़ोन सीधा (Portrait) हो तो यह दिखेगा -->
   <div id="rotateMessage">
-    कृपया इस ऐप को चलाने के लिए अपना फ़ोन आड़ा (Landscape) करें 🔄
+    कृपया अपना फ़ोन आड़ा (Landscape) करें 🔄
   </div>
 
-  <!-- आपके ऐप की मुख्य स्क्रीन -->
   <div id="app">
-    <h1>स्वागत है! यह आपका Landscape PWA है</h1>
-    <p>यह ऐप पूरी तरह Online और Full-Screen मोड में काम करता है।</p>
-    <button id="installBtn">📲 App Install करें</button>
+    <h1>मेरा Landscape ऐप</h1>
+    <p>फुल-स्क्रीन में चलाने के लिए नीचे दिए बटन पर क्लिक करें:</p>
+    <button id="installBtn">📲 Install App</button>
   </div>
 
   <script>
     // 1. Service Worker रजिस्टर करें
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(() => console.log('Service Worker Registered'))
-          .catch((err) => console.error('SW Error:', err));
-      });
+      navigator.serviceWorker.register('/sw.js');
     }
 
-    // 2. Custom Install Button लॉजिक
-    let deferredPrompt;
+    let deferredPrompt = null;
     const installBtn = document.getElementById('installBtn');
 
+    // अगर ऐप पहले से इंस्टॉल मोड (Fullscreen/Standalone) में खुला है, तो बटन छिपा दें
+    if (window.matchMedia('(display-mode: fullscreen)').matches || window.navigator.standalone === true) {
+      installBtn.style.display = 'none';
+    }
+
+    // ब्राउज़र का इंस्टॉल इवेंट कैप्चर करें
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.style.display = 'inline-block';
     });
 
+    // बटन क्लिक करते ही इंस्टॉल पॉप-अप खोलें
     installBtn.addEventListener('click', async () => {
       if (deferredPrompt) {
+        // Android / Chrome / Edge पर सीधा इंस्टॉल पॉप-अप खुलेगा
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
           installBtn.style.display = 'none';
         }
         deferredPrompt = null;
+      } else {
+        // iPhone (Safari) या जब ब्राउज़र पॉप-अप ब्लॉक करे
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isIOS) {
+          alert('iPhone पर इंस्टॉल करने के लिए:\n1. नीचे Share आइकन (⬆️) पर टैप करें\n2. "Add to Home Screen" चुनें');
+        } else {
+          alert('इंस्टॉल करने के लिए ब्राउज़र के ऊपर दाईं ओर 3 डॉट्स (⋮) पर क्लिक करें और "Install app" या "Add to Home screen" चुनें।');
+        }
       }
     });
 
-    // 3. ऐप इंस्टॉल होने के बाद बटन छिपा दें
+    // इंस्टॉल पूरा होते ही बटन हटा दें
     window.addEventListener('appinstalled', () => {
       installBtn.style.display = 'none';
+      deferredPrompt = null;
     });
   </script>
 </body>
