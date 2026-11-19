@@ -1,7 +1,7 @@
 {
   "name": "My PWA",
   "short_name": "My PWA",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone"],
