@@ -1,37 +1,85 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>My PWA</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+
+  <title>My Simple PWA</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
 
-  <h1>My Simple PWA 🚀</h1>
-  <p>Welcome to my app!</p>
+  <h1>🚀 My Simple PWA</h1>
+  <p>Welcome to my application!</p>
 
-  <button id="install">Install App</button>
+  <button id="installBtn">📲 Install App</button>
+
+  <p id="status">App is ready</p>
 
   <script>
-    let promptEvent;
+    let deferredPrompt;
 
-    window.addEventListener("beforeinstallprompt", e => {
-      e.preventDefault();
-      promptEvent = e;
-      document.getElementById("install").style.display = "block";
+    const installBtn = document.getElementById("installBtn");
+    const status = document.getElementById("status");
+
+    // Register Service Worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js")
+        .then(() => {
+          status.innerText = "Service Worker Ready ✅";
+        })
+        .catch(error => {
+          status.innerText = "Service Worker Error";
+          console.error(error);
+        });
+    }
+
+    // Listen for install event
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredPrompt = event;
+      status.innerText = "Ready to Install ✅";
     });
 
-    document.getElementById("install").onclick = async () => {
-      if (!promptEvent) return;
-      promptEvent.prompt();
-      await promptEvent.userChoice;
-      promptEvent = null;
-    };
+    // Install button
+    installBtn.addEventListener("click", async () => {
 
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js");
-    }
+      if (deferredPrompt) {
+
+        deferredPrompt.prompt();
+
+        const result = await deferredPrompt.userChoice;
+
+        if (result.outcome === "accepted") {
+          status.innerText = "App Installing 🎉";
+        } else {
+          status.innerText = "Installation cancelled";
+        }
+
+        deferredPrompt = null;
+
+      } else {
+        status.innerText =
+          "Chrome menu se Install App select karein.";
+
+        alert(
+          "Chrome ke 3 dots par click karein aur Install App ya Add to Home Screen select karein."
+        );
+      }
+
+    });
+
+    // Installed event
+    window.addEventListener("appinstalled", () => {
+      status.innerText = "App Installed Successfully 🎉";
+      installBtn.style.display = "none";
+    });
+
   </script>
 
 </body>
