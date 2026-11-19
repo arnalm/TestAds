@@ -9,7 +9,6 @@
 
   <title>TIME & TEL</title>
 
-  
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,17 +21,16 @@
     * {
       margin: 0;
       padding: 0;
-    
+      box-sizing: border-box;
     }
 
-body {
+    body {
       width: 100%;
       height: 100vh;
       background: red;
       text-align: center;
+      padding-top: 40px;
     }
-
-    
 
     .logo {
       font-size: 65px;
@@ -52,10 +50,11 @@ body {
     }
 
     button {
+      display: block; /* Saare buttons ek ke niche ek aur center mein rahenge */
       width: 240px;
       max-width: 90%;
       padding: 14px;
-      margin-top: 12px;
+      margin: 12px auto 0 auto; /* Ye button ko center mein rakhega */
       border: none;
       border-radius: 10px;
       font-size: 17px;
@@ -72,11 +71,10 @@ body {
       color: #111827;
     }
 
-    #install-btn{
+    #install-btn {
       display: none; /* Shuru mein hidden taaki installed app mein flash na ho */
       background: #16a34a;
       color: orange;
-  
     }
 
     .secondary {
@@ -84,42 +82,33 @@ body {
       color: white;
       border: 1px solid #6b7280;
     }
-
-    
   </style>
 </head>
 
 <body>
 
+  <div class="logo">🚚⛽</div>
 
+  <h1>TIME & TEL</h1>
 
-    <div class="logo">🚚⛽</div>
+  <p class="subtitle">
+    Welcome to Time & Tel Game!<br>
+    Ready to Play?
+  </p>
 
-    <h1>TIME & TEL</h1>
-
-    <p class="subtitle">
-      Welcome to Time & Tel Game!<br>
-      Ready to Play?
-    </p>
-
-    <a href="./app.html"
-       style="text-decoration:none; width:240px; max-width:90%;">
-
-      <button id="start-btn" type="button">
-        ▶ Play Now
-      </button>
-
-    </a>
-
-    
-
-    <button id="share-btn" class="secondary" type="button">
-      📤 Share App
+  <a href="./app.html" style="text-decoration:none; display:block;">
+    <button id="start-btn" type="button">
+      ▶ Play Now
     </button>
-<button id="install-btn" type="button">
-      📲 Install App
-</button>
-  
+  </a>
+
+  <button id="share-btn" class="secondary" type="button">
+    📤 Share App
+  </button>
+
+  <button id="install-btn" type="button">
+    📲 Install App
+  </button>
 
   <script type="text/javascript" charset="utf-8">
     //____1. Service Worker Registration____
@@ -167,10 +156,8 @@ body {
         return;
       }
 
-      // Sirf tab dikhayein jab install prompt available ho ya browser guidance dena ho
       if (deferredPrompt) {
         installBtn.style.display = "block";
-        
       } else {
         installBtn.style.display = "none";
       }
@@ -178,7 +165,6 @@ body {
 
     updateInstallButtonVisibility();
 
-    // Agar user display mode badalta hai (jaise browser se installed window mein shift)
     window.matchMedia("(display-mode: standalone)").addEventListener("change", updateInstallButtonVisibility);
 
     window.addEventListener("beforeinstallprompt", async (event) => {
