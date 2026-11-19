@@ -18,6 +18,7 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
+    /* यहाँ '-' की जगह '*' सही कर दिया गया है */
     * {
       margin: 0;
       padding: 0;
@@ -26,14 +27,15 @@
 
     body {
       width: 100%;
-      height: 100vh;
+      min-height: 100vh; /* height की जगह min-height ताकि बटन न कटे */
       background: red;
       text-align: center;
-      padding-top: 40px;
+      padding: 20px 10px 40px 10px;
     }
 
     .logo {
       font-size: 65px;
+      margin-top: 15px;
       margin-bottom: 12px;
     }
 
@@ -50,11 +52,11 @@
     }
 
     button {
-      display: block; /* Saare buttons ek ke niche ek aur center mein rahenge */
+      display: block;
       width: 240px;
       max-width: 90%;
       padding: 14px;
-      margin: 12px auto 0 auto; /* Ye button ko center mein rakhega */
+      margin: 12px auto 0 auto;
       border: none;
       border-radius: 10px;
       font-size: 17px;
@@ -66,15 +68,23 @@
       transform: scale(.96);
     }
 
+    #fullscreen-btn {
+      background: #007bff;
+      color: white;
+      padding: 10px 15px;
+      font-size: 15px;
+      margin-bottom: 15px;
+    }
+
     #start-btn {
       background: #fbbf24;
       color: #111827;
     }
 
     #install-btn {
-      display: none; /* Shuru mein hidden taaki installed app mein flash na ho */
+      display: none;
       background: #16a34a;
-      color: orange;
+      color: white;
     }
 
     .secondary {
@@ -86,6 +96,11 @@
 </head>
 
 <body>
+
+  <!-- Full Screen बटन को सबसे ऊपर रखा गया है -->
+  <button id="fullscreen-btn" type="button" onclick="toggleFullScreen()">
+    ⛶ Full Screen करें
+  </button>
 
   <div class="logo">🚚⛽</div>
 
@@ -109,12 +124,26 @@
   <button id="install-btn" type="button">
     📲 Install App
   </button>
-<!-- इसे अपने ऐप में सबसे ऊपर लगा दें -->
-<button onclick="document.documentElement.requestFullscreen()" style="padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 5px;">
-  ⛶ Full Screen करें
-</button>
   
   <script type="text/javascript" charset="utf-8">
+    //____0. Full Screen Function____
+    function toggleFullScreen() {
+      const elem = document.documentElement;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari / iPhone सपोर्ट के लिए */
+          elem.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    }
+
     //____1. Service Worker Registration____
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
