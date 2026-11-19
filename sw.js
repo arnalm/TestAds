@@ -1,25 +1,22 @@
-const CACHE_NAME = 'pwa-cache-v1';
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-512.png'
-];
+const CACHE_NAME = 'online-only-v1';
+const OFFLINE_URL = '/offline.html';
 
-// इंस्टॉल करते समय फ़ाइलों को कैश करना
+// 1. इंस्टॉल होने पर सिर्फ ऑफ़लाइन अलर्ट पेज को सेव करें
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.add(OFFLINE_URL))
   );
+  self.skipWaiting();
 });
 
-// ऑफलाइन या तेज़ लोडिंग के लिए कैश से डेटा देना
+// 2. हर रिक्वेस्ट को सीधे इंटरनेट (Network) से लोड करें
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // इंटरनेट न होने पर offline.html दिखाएं
+        return caches.match(OFFLINE_URL);
+      })
+    );
+  }
 });
