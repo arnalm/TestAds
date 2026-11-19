@@ -1,15 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
 
   <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
   <title>TIME & TEL</title>
 
-  <meta name="theme-color" content="#BDBDBD">
+  <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -27,7 +27,8 @@
 
     html, body {
       width: 100%;
-      height: 100vh;
+      height: 100%;
+      height: 100dvh;
       overflow: hidden;
       background: #000;
       font-family: Arial, sans-serif;
@@ -86,15 +87,26 @@
     }
 
     #install-btn {
+      display: none; /* Shuru mein hidden taaki installed app mein flash na ho */
       background: #16a34a;
       color: white;
-      display: none;
     }
 
     .secondary {
       background: #374151;
       color: white;
       border: 1px solid #6b7280;
+    }
+
+    #main-frame {
+      display: none;
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      border: 0;
+      background: #000;
     }
   </style>
 </head>
@@ -113,7 +125,7 @@
     </p>
 
     <a href="./app.html"
-      style="text-decoration:none; width:240px; max-width:90%;">
+       style="text-decoration:none; width:240px; max-width:90%;">
 
       <button id="start-btn" type="button">
         ▶ Play Now
@@ -125,89 +137,99 @@
       📲 Install App
     </button>
 
-    <button class="secondary" id="share-btn" type="button">
+    <button id="share-btn" class="secondary" type="button">
       📤 Share App
     </button>
 
   </div>
 
-  <script>
-    // =========================
-    // PWA INSTALL BUTTON
-    // =========================
+  <script type="text/javascript" charset="utf-8">
+    //____1. Service Worker Registration____
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js")
+          .then((reg) => {
+            console.log("Service Worker registered:", reg.scope);
+          })
+          .catch((err) => {
+            console.error("Service Worker registration failed:", err);
+          });
+      });
+    }
 
+    //____2. App Install Button Code (Hide if already installed)____
+    let deferredPrompt = null;
     const installBtn = document.getElementById("install-btn");
 
-    let deferredPrompt = null;
-
-    function isInstalledPWA() {
+    function isRunningAsInstalledPWA() {
       return (
         window.matchMedia("(display-mode: standalone)").matches ||
         window.matchMedia("(display-mode: fullscreen)").matches ||
         window.matchMedia("(display-mode: minimal-ui)").matches ||
-        window.navigator.standalone === true
+        window.navigator.standalone === true ||
+        document.referrer.includes("android-app://")
       );
     }
 
-    function updateInstallButton() {
-      if (isInstalledPWA()) {
+    async function hasRelatedInstalledApp() {
+      if ("getInstalledRelatedApps" in navigator) {
+        try {
+          const relatedApps = await navigator.getInstalledRelatedApps();
+          return Array.isArray(relatedApps) && relatedApps.length > 0;
+        } catch (err) {
+          return false;
+        }
+      }
+      return false;
+    }
+
+    async function updateInstallButtonVisibility() {
+      if (isRunningAsInstalledPWA() || await hasRelatedInstalledApp()) {
         installBtn.style.display = "none";
-      } else if (deferredPrompt) {
+        return;
+      }
+
+      // Sirf tab dikhayein jab install prompt available ho ya browser guidance dena ho
+      if (deferredPrompt) {
         installBtn.style.display = "block";
       } else {
         installBtn.style.display = "none";
       }
     }
 
-    // Check on page load and reload
-    updateInstallButton();
+    updateInstallButtonVisibility();
 
-    // Browser says installation is available
-    window.addEventListener("beforeinstallprompt", (event) => {
+    // Agar user display mode badalta hai (jaise browser se installed window mein shift)
+    window.matchMedia("(display-mode: standalone)").addEventListener("change", updateInstallButtonVisibility);
+
+    window.addEventListener("beforeinstallprompt", async (event) => {
       event.preventDefault();
-
       deferredPrompt = event;
-
-      updateInstallButton();
+      await updateInstallButtonVisibility();
     });
 
-    // Install button click
     installBtn.addEventListener("click", async () => {
       if (!deferredPrompt) return;
 
       deferredPrompt.prompt();
-
       const result = await deferredPrompt.userChoice;
-
-      deferredPrompt = null;
-
-      updateInstallButton();
 
       if (result.outcome === "accepted") {
         installBtn.style.display = "none";
       }
-    });
 
-    // App installed
-    window.addEventListener("appinstalled", () => {
       deferredPrompt = null;
-      installBtn.style.display = "none";
     });
 
-    // Display mode changes
-    const displayMode = window.matchMedia("(display-mode: standalone)");
+    window.addEventListener("appinstalled", () => {
+      installBtn.style.display = "none";
+      deferredPrompt = null;
+    });
 
-    displayMode.addEventListener("change", updateInstallButton);
-
-
-    // =========================
-    // SHARE APP BUTTON
-    // =========================
-
+    //____3. Share Button Code____
     const shareBtn = document.getElementById("share-btn");
 
     shareBtn.addEventListener("click", async () => {
-
       const shareData = {
         title: "TIME & TEL Game",
         text: "🚚⛽ Play TIME & TEL Game! Try this amazing game!",
@@ -225,33 +247,12 @@
           await navigator.clipboard.writeText(
             shareData.text + " " + shareData.url
           );
-
           alert("Game link copied! Share it with your friends.");
         } catch (error) {
           prompt("Copy your game link:", shareData.url);
         }
       }
-
     });
-
-
-// PWA SERVICE WORKER
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    try {
-      const registration =
-        await navigator.serviceWorker.register("./sw.js");
-
-      console.log("TIME & TEL PWA Ready!");
-    } catch (error) {
-      console.error("PWA Error:", error);
-    }
-  });
-}
-
-    
-
   </script>
 
 </body>
