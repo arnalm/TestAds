@@ -8,8 +8,9 @@
   "scope": "./",
   "display": "fullscreen",
   "orientation": "landscape",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+"background_color": "#D3D3D3",
+"theme_color": "#D3D3D3"
+
   "icons": [
     {
       "src": "./icons/icon-192.png",
