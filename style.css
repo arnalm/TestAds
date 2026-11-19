@@ -1,0 +1,35 @@
+/* Keep the document's initial paint consistent with the PWA theme. */
+:root {
+  color-scheme: dark;
+  --app-bg: #ff0000;
+  --app-fg: #ffffff;
+}
+
+html {
+  margin: 0;
+  min-height: 100%;
+  background: var(--app-bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  box-sizing: border-box;
+  background: var(--app-bg);
+  color: var(--app-fg);
+  font-family: system-ui, sans-serif;
+}
+
+#app {
+  min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  background: var(--app-bg);
+  box-sizing: border-box;
+}
+
+/* Prevent default margins from creating visible gaps at the top. */
+h1, p {
+  margin-top: 0;
+}
