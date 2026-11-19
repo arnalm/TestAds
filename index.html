@@ -1,86 +1,62 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#2563eb">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2563eb">
 
-  <title>My Simple PWA</title>
+<title>My Online PWA</title>
 
-  <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <h1>🚀 My Simple PWA</h1>
-  <p>Welcome to my application!</p>
+<div class="container">
+  <h1>🚀 My Online PWA</h1>
 
-  <button id="installBtn">📲 Install App</button>
+  <p id="status">Checking Internet...</p>
 
-  <p id="status">App is ready</p>
+  <h2>Welcome!</h2>
 
-  <script>
-    let deferredPrompt;
+  <button id="installBtn">Install App</button>
+</div>
 
-    const installBtn = document.getElementById("installBtn");
-    const status = document.getElementById("status");
+<script>
+let deferredPrompt;
 
-    // Register Service Worker
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./sw.js")
-        .then(() => {
-          status.innerText = "Service Worker Ready ✅";
-        })
-        .catch(error => {
-          status.innerText = "Service Worker Error";
-          console.error(error);
-        });
-    }
+const status = document.getElementById("status");
 
-    // Listen for install event
-    window.addEventListener("beforeinstallprompt", (event) => {
-      event.preventDefault();
-      deferredPrompt = event;
-      status.innerText = "Ready to Install ✅";
-    });
+function checkInternet() {
+  status.innerText = navigator.onLine
+    ? "🟢 Online"
+    : "🔴 Internet Disconnected";
+}
 
-    // Install button
-    installBtn.addEventListener("click", async () => {
+window.addEventListener("online", checkInternet);
+window.addEventListener("offline", checkInternet);
+checkInternet();
 
-      if (deferredPrompt) {
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
 
-        deferredPrompt.prompt();
+document.getElementById("installBtn").onclick = async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  } else {
+    alert("Chrome menu se Install App select karein.");
+  }
+};
 
-        const result = await deferredPrompt.userChoice;
-
-        if (result.outcome === "accepted") {
-          status.innerText = "App Installing 🎉";
-        } else {
-          status.innerText = "Installation cancelled";
-        }
-
-        deferredPrompt = null;
-
-      } else {
-        status.innerText =
-          "Chrome menu se Install App select karein.";
-
-        alert(
-          "Chrome ke 3 dots par click karein aur Install App ya Add to Home Screen select karein."
-        );
-      }
-
-    });
-
-    // Installed event
-    window.addEventListener("appinstalled", () => {
-      status.innerText = "App Installed Successfully 🎉";
-      installBtn.style.display = "none";
-    });
-
-  </script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js");
+}
+</script>
 
 </body>
 </html>
