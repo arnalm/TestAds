@@ -3,7 +3,7 @@
   "short_name": "टेस्ट ऐप",
   "start_url": "/",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#DC2626",
   "theme_color": "#DC2626",
   "icons": [
