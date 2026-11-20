@@ -9,7 +9,7 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-<title>TIMEB & TEL GAME</title>
+<title>TIME & TEL GAME</title>
 
 <link rel="manifest" href="./manifest.json">
 
@@ -33,7 +33,7 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background:red;
+    background: #1E293B;
     font-family: Arial, sans-serif;
 }
 
@@ -52,7 +52,7 @@ html, body {
 
 #fullscreen-btn {
     padding: 18px 30px;
-    background: orange;
+    background: #fbbf24;
     color: #111827;
     border: none;
     border-radius: 12px;
@@ -125,7 +125,10 @@ document.getElementById("game-container");
 /* GAME STATUS */
 
 let gameStarted = false;
-let backHandlerActive = false;
+
+let gameHistoryAdded = false;
+
+let exitingGame = false;
 
 
 /* THREE JS SCENE */
@@ -305,15 +308,15 @@ window.addEventListener("resize", resizeGame);
 
 function enableBackButton() {
 
-    if (backHandlerActive) return;
+    if (gameHistoryAdded) return;
 
     history.pushState(
         { gameScreen: true },
         "",
-        window.location.href
+        location.href
     );
 
-    backHandlerActive = true;
+    gameHistoryAdded = true;
 
 }
 
@@ -343,7 +346,7 @@ fullscreenBtn.addEventListener(
         }
 
 
-        // LANDSCAPE LOCK
+        // LANDSCAPE
 
         try {
 
@@ -370,24 +373,23 @@ fullscreenBtn.addEventListener(
         pivot.rotation.y = 0;
 
 
-        // ENABLE BACK BUTTON
+        // HISTORY
 
         enableBackButton();
 
 
-        // HIDE START SCREEN
+        // SHOW GAME
 
         startScreen.style.display = "none";
-
-
-        // SHOW GAME
 
         gameContainer.style.display = "block";
 
 
-        // START GAME
+        // START
 
         gameStarted = true;
+
+        exitingGame = false;
 
         resizeGame();
 
@@ -401,7 +403,9 @@ fullscreenBtn.addEventListener(
 
 function exitGame() {
 
-    if (!gameStarted) return;
+    if (!gameStarted || exitingGame) return;
+
+    exitingGame = true;
 
     // STOP GAME
 
@@ -420,27 +424,31 @@ function exitGame() {
     pivot.rotation.y = 0;
 
 
-    // SHOW ENTER FULLSCREEN BUTTON
+    // SHOW START BUTTON
 
     startScreen.style.display = "flex";
 
 
-    // RESET BACK HANDLER
+    // DO NOT EXIT FULLSCREEN HERE
 
-    backHandlerActive = false;
+    // DO NOT UNLOCK ORIENTATION
 
 }
 
 
-/* MOBILE BACK BUTTON */
+/* BACK BUTTON */
 
 window.addEventListener(
     "popstate",
     function() {
 
-        if (!gameStarted) return;
+        if (gameStarted) {
 
-        exitGame();
+            exitGame();
+
+            gameHistoryAdded = false;
+
+        }
 
     }
 );
@@ -452,15 +460,13 @@ document.addEventListener(
     "fullscreenchange",
     function() {
 
-        // FULLSCREEN EXITED
-
         if (!document.fullscreenElement && gameStarted) {
 
             exitGame();
 
-        }
+            gameHistoryAdded = false;
 
-        // FULLSCREEN ACTIVE
+        }
 
         if (document.fullscreenElement && gameStarted) {
 
