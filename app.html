@@ -285,7 +285,6 @@ animate();
 function resizeGame() {
 
     const width = gameContainer.clientWidth;
-
     const height = gameContainer.clientHeight;
 
     if (!width || !height) return;
@@ -343,7 +342,7 @@ fullscreenBtn.addEventListener(
         }
 
 
-        // LANDSCAPE MODE
+        // LANDSCAPE LOCK
 
         try {
 
@@ -366,7 +365,6 @@ fullscreenBtn.addEventListener(
         // RESET DOOR
 
         target = 0;
-
         pivot.rotation.y = 0;
 
 
@@ -399,10 +397,9 @@ fullscreenBtn.addEventListener(
 
 /* EXIT GAME */
 
-async function exitGame() {
+function exitGame() {
 
     if (!gameStarted) return;
-
 
     // STOP GAME
 
@@ -417,48 +414,15 @@ async function exitGame() {
     // RESET DOOR
 
     target = 0;
-
     pivot.rotation.y = 0;
 
 
-    // EXIT FULLSCREEN
+    // DO NOT UNLOCK LANDSCAPE
 
-    if (document.fullscreenElement) {
-
-        try {
-
-            await document.exitFullscreen();
-
-        } catch(error) {
-
-            console.log("Exit fullscreen error:", error);
-
-        }
-
-    }
+    // DO NOT EXIT FULLSCREEN
 
 
-    // UNLOCK LANDSCAPE
-
-    try {
-
-        if (
-            screen.orientation &&
-            screen.orientation.unlock
-        ) {
-
-            screen.orientation.unlock();
-
-        }
-
-    } catch(error) {
-
-        console.log("Orientation unlock error:", error);
-
-    }
-
-
-    // SHOW FULLSCREEN BUTTON
+    // SHOW ENTER FULLSCREEN BUTTON
 
     startScreen.style.display = "flex";
 
@@ -491,9 +455,7 @@ document.addEventListener(
     function() {
 
         if (gameStarted) {
-
             resizeGame();
-
         }
 
     }
