@@ -1,7 +1,7 @@
-self.addEventListener("install", event => {
+self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-self.addEventListener("activate", event => {
-  event.waitUntil(self.clients.claim());
+self.addEventListener('fetch', (event) => {
+  // PWA इंस्टॉल करने के लिए यह इवेंट ज़रूरी है
 });
