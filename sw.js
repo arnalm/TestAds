@@ -1,4 +1,3 @@
-
 const CACHE_NAME = "time-and-tel-v1";
 
 const ASSETS_TO_CACHE = [
