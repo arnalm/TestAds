@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,11 +6,12 @@
   <meta charset="UTF-8">
 
   <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
   <title>TIME & TEL</title>
-<meta name="theme-color" content="#1E293B" />
-  
+
+  <meta name="theme-color" content="#1E293B">
+
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -19,20 +21,24 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
-    
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
       width: 100%;
-      min-height: 100vh; /* height की जगह min-height ताकि बटन न कटे */
-      background:#1E293B ;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: #1E293B;
       text-align: center;
       padding: 20px 10px 40px 10px;
-      boder:1px solid green;
     }
 
     .logo {
@@ -94,14 +100,14 @@
       color: white;
       border: 1px solid #6b7280;
     }
+
   </style>
 </head>
 
 <body>
 
-  
-  <button id="fullscreen-btn" type="button" onclick="toggleFullScreen()">
-    ⛶ Full Screen 
+  <button id="fullscreen-btn" type="button">
+    ⛶ Full Screen
   </button>
 
   <div class="logo">🚚⛽</div>
@@ -113,11 +119,9 @@
     Ready to Play?
   </p>
 
-  <a href="./app.html" style="text-decoration:none; display:block;">
-    <button id="start-btn" type="button">
-      ▶ Play Now
-    </button>
-  </a>
+  <button id="start-btn" type="button">
+    ▶ Play Now
+  </button>
 
   <button id="share-btn" class="secondary" type="button">
     📤 Share App
@@ -126,92 +130,216 @@
   <button id="install-btn" type="button">
     📲 Install App
   </button>
-  
-  <script type="text/javascript" charset="utf-8">
-    //____0. Full Screen Function____
-    function toggleFullScreen() {
+
+
+  <script>
+
+    // 0. FULL SCREEN FUNCTION
+
+    async function enterFullScreen() {
+
       const elem = document.documentElement;
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (elem.requestFullscreen) {
-          elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) { /* Safari / iPhone सपोर्ट के लिए */
-          elem.webkitRequestFullscreen();
+
+      try {
+
+        if (!document.fullscreenElement &&
+            !document.webkitFullscreenElement) {
+
+          if (elem.requestFullscreen) {
+            await elem.requestFullscreen();
+
+          } else if (elem.webkitRequestFullscreen) {
+            await elem.webkitRequestFullscreen();
+          }
         }
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
+
+      } catch (error) {
+        console.log("Fullscreen not supported:", error);
       }
     }
 
-    //____1. Service Worker Registration____
+
+    // 1. LANDSCAPE MODE FUNCTION
+
+    async function lockLandscape() {
+
+      try {
+
+        if (screen.orientation &&
+            screen.orientation.lock) {
+
+          await screen.orientation.lock("landscape");
+        }
+
+      } catch (error) {
+        console.log("Landscape lock not supported:", error);
+      }
+    }
+
+
+    // 2. FULL SCREEN BUTTON
+
+    document.getElementById("fullscreen-btn")
+      .addEventListener("click", async () => {
+
+        if (document.fullscreenElement ||
+            document.webkitFullscreenElement) {
+
+          try {
+
+            if (document.exitFullscreen) {
+              await document.exitFullscreen();
+
+            } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+            }
+
+          } catch (error) {
+            console.log(error);
+          }
+
+        } else {
+
+          await enterFullScreen();
+          await lockLandscape();
+
+        }
+
+      });
+
+
+    // 3. PLAY NOW BUTTON
+
+    document.getElementById("start-btn")
+      .addEventListener("click", async () => {
+
+        // Full Screen
+        await enterFullScreen();
+
+        // Landscape Mode
+        await lockLandscape();
+
+        // Open Game
+        window.location.href = "./app.html";
+
+      });
+
+
+    // 4. SERVICE WORKER REGISTRATION
+
     if ("serviceWorker" in navigator) {
+
       window.addEventListener("load", () => {
+
         navigator.serviceWorker.register("./sw.js")
+
           .then((reg) => {
             console.log("Service Worker registered:", reg.scope);
           })
+
           .catch((err) => {
             console.error("Service Worker registration failed:", err);
           });
+
       });
+
     }
 
-    //____2. App Install Button Code (Hide if already installed)____
+
+    // 5. APP INSTALL BUTTON
+
     let deferredPrompt = null;
+
     const installBtn = document.getElementById("install-btn");
 
+
     function isRunningAsInstalledPWA() {
+
       return (
+
         window.matchMedia("(display-mode: standalone)").matches ||
+
         window.matchMedia("(display-mode: fullscreen)").matches ||
+
         window.matchMedia("(display-mode: minimal-ui)").matches ||
+
         window.navigator.standalone === true ||
+
         document.referrer.includes("android-app://")
+
       );
+
     }
 
+
     async function hasRelatedInstalledApp() {
+
       if ("getInstalledRelatedApps" in navigator) {
+
         try {
-          const relatedApps = await navigator.getInstalledRelatedApps();
-          return Array.isArray(relatedApps) && relatedApps.length > 0;
+
+          const relatedApps =
+            await navigator.getInstalledRelatedApps();
+
+          return Array.isArray(relatedApps) &&
+            relatedApps.length > 0;
+
         } catch (err) {
           return false;
         }
+
       }
+
       return false;
+
     }
+
 
     async function updateInstallButtonVisibility() {
-      if (isRunningAsInstalledPWA() || await hasRelatedInstalledApp()) {
+
+      if (isRunningAsInstalledPWA() ||
+          await hasRelatedInstalledApp()) {
+
         installBtn.style.display = "none";
         return;
+
       }
 
-      if (deferredPrompt) {
-        installBtn.style.display = "block";
-      } else {
-        installBtn.style.display = "none";
-      }
+      installBtn.style.display = deferredPrompt
+        ? "block"
+        : "none";
+
     }
+
 
     updateInstallButtonVisibility();
 
-    window.matchMedia("(display-mode: standalone)").addEventListener("change", updateInstallButtonVisibility);
+
+    if (window.matchMedia("(display-mode: standalone)").addEventListener) {
+
+      window.matchMedia("(display-mode: standalone)")
+        .addEventListener("change", updateInstallButtonVisibility);
+
+    }
+
 
     window.addEventListener("beforeinstallprompt", async (event) => {
+
       event.preventDefault();
+
       deferredPrompt = event;
+
       await updateInstallButtonVisibility();
+
     });
 
+
     installBtn.addEventListener("click", async () => {
+
       if (!deferredPrompt) return;
 
       deferredPrompt.prompt();
+
       const result = await deferredPrompt.userChoice;
 
       if (result.outcome === "accepted") {
@@ -219,40 +347,69 @@
       }
 
       deferredPrompt = null;
+
     });
+
 
     window.addEventListener("appinstalled", () => {
+
       installBtn.style.display = "none";
+
       deferredPrompt = null;
+
     });
 
-    //____3. Share Button Code____
+
+    // 6. SHARE APP BUTTON
+
     const shareBtn = document.getElementById("share-btn");
 
+
     shareBtn.addEventListener("click", async () => {
+
       const shareData = {
+
         title: "TIME & TEL Game",
+
         text: "🚚⛽ Play TIME & TEL Game! Try this amazing game!",
+
         url: window.location.href
+
       };
 
+
       if (navigator.share) {
+
         try {
+
           await navigator.share(shareData);
+
         } catch (error) {
+
           console.log("Sharing cancelled");
+
         }
+
       } else {
+
         try {
+
           await navigator.clipboard.writeText(
             shareData.text + " " + shareData.url
           );
+
           alert("Game link copied! Share it with your friends.");
+
         } catch (error) {
+
           prompt("Copy your game link:", shareData.url);
+
         }
+
       }
+
     });
+
   </script>
 
 </body>
