@@ -1,7 +1,9 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 
 <meta name="viewport"
@@ -12,11 +14,15 @@ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable
 <link rel="manifest" href="./manifest.json">
 
 <meta name="theme-color" content="#1E293B">
+
 <meta name="mobile-web-app-capable" content="yes">
+
 <meta name="apple-mobile-web-app-capable" content="yes">
+
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
 <style>
+
 * {
     margin: 0;
     padding: 0;
@@ -31,6 +37,8 @@ html, body {
     font-family: Arial, sans-serif;
 }
 
+/* START SCREEN */
+
 #start-screen {
     width: 100%;
     height: 100%;
@@ -39,6 +47,8 @@ html, body {
     align-items: center;
     background: #1E293B;
 }
+
+/* FULLSCREEN BUTTON */
 
 #fullscreen-btn {
     padding: 18px 30px;
@@ -55,6 +65,8 @@ html, body {
     transform: scale(0.95);
 }
 
+/* GAME SCREEN */
+
 #game-container {
     display: none;
     position: fixed;
@@ -70,20 +82,27 @@ html, body {
     width: 100%;
     height: 100%;
 }
+
 </style>
+
 </head>
 
 <body>
 
 <!-- START SCREEN -->
+
 <div id="start-screen">
+
     <button id="fullscreen-btn">
         ⛶ ENTER FULLSCREEN
     </button>
+
 </div>
 
 <!-- GAME SCREEN -->
+
 <div id="game-container"></div>
+
 
 <script type="module">
 
@@ -126,6 +145,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 camera.position.set(4, 3, 6);
+
 camera.lookAt(0, 1, 0);
 
 
@@ -163,6 +183,7 @@ const light = new THREE.DirectionalLight(
 );
 
 light.position.set(5, 10, 5);
+
 scene.add(light);
 
 
@@ -170,6 +191,7 @@ scene.add(light);
 
 const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(10, 10),
+
     new THREE.MeshStandardMaterial({
         color: 0x808080,
         wireframe: true
@@ -177,6 +199,7 @@ const floor = new THREE.Mesh(
 );
 
 floor.rotation.x = -Math.PI / 2;
+
 scene.add(floor);
 
 
@@ -184,6 +207,7 @@ scene.add(floor);
 
 const frame = new THREE.Mesh(
     new THREE.BoxGeometry(0.1, 2.2, 1.2),
+
     new THREE.MeshStandardMaterial({
         color: 0x444444,
         wireframe: true
@@ -191,6 +215,7 @@ const frame = new THREE.Mesh(
 );
 
 frame.position.set(0, 1.1, 0);
+
 scene.add(frame);
 
 
@@ -199,6 +224,7 @@ scene.add(frame);
 const pivot = new THREE.Group();
 
 pivot.position.set(0, 0, 0);
+
 scene.add(pivot);
 
 
@@ -206,6 +232,7 @@ scene.add(pivot);
 
 const door = new THREE.Mesh(
     new THREE.BoxGeometry(1, 2, 0.08),
+
     new THREE.MeshStandardMaterial({
         color: 0x8b4513,
         wireframe: true
@@ -213,6 +240,7 @@ const door = new THREE.Mesh(
 );
 
 door.position.set(0.5, 1, 0);
+
 pivot.add(door);
 
 
@@ -257,11 +285,13 @@ animate();
 function resizeGame() {
 
     const width = gameContainer.clientWidth;
+
     const height = gameContainer.clientHeight;
 
     if (!width || !height) return;
 
     camera.aspect = width / height;
+
     camera.updateProjectionMatrix();
 
     renderer.setSize(width, height);
@@ -271,7 +301,7 @@ function resizeGame() {
 window.addEventListener("resize", resizeGame);
 
 
-/* BACK BUTTON HISTORY */
+/* HISTORY SYSTEM */
 
 function enableBackButton() {
 
@@ -301,15 +331,19 @@ fullscreenBtn.addEventListener(
         try {
 
             if (!document.fullscreenElement) {
+
                 await document.documentElement.requestFullscreen();
+
             }
 
         } catch(error) {
+
             console.log("Fullscreen error:", error);
+
         }
 
 
-        // LANDSCAPE
+        // LANDSCAPE MODE
 
         try {
 
@@ -317,17 +351,22 @@ fullscreenBtn.addEventListener(
                 screen.orientation &&
                 screen.orientation.lock
             ) {
+
                 await screen.orientation.lock("landscape");
+
             }
 
         } catch(error) {
-            console.log("Orientation error:", error);
+
+            console.log("Landscape error:", error);
+
         }
 
 
         // RESET DOOR
 
         target = 0;
+
         pivot.rotation.y = 0;
 
 
@@ -351,6 +390,7 @@ fullscreenBtn.addEventListener(
         gameStarted = true;
 
         resizeGame();
+
         renderer.render(scene, camera);
 
     }
@@ -362,6 +402,7 @@ fullscreenBtn.addEventListener(
 async function exitGame() {
 
     if (!gameStarted) return;
+
 
     // STOP GAME
 
@@ -376,6 +417,7 @@ async function exitGame() {
     // RESET DOOR
 
     target = 0;
+
     pivot.rotation.y = 0;
 
 
@@ -384,9 +426,13 @@ async function exitGame() {
     if (document.fullscreenElement) {
 
         try {
+
             await document.exitFullscreen();
+
         } catch(error) {
-            console.log(error);
+
+            console.log("Exit fullscreen error:", error);
+
         }
 
     }
@@ -400,20 +446,24 @@ async function exitGame() {
             screen.orientation &&
             screen.orientation.unlock
         ) {
+
             screen.orientation.unlock();
+
         }
 
     } catch(error) {
-        console.log(error);
+
+        console.log("Orientation unlock error:", error);
+
     }
 
 
-    // SHOW START BUTTON
+    // SHOW FULLSCREEN BUTTON
 
     startScreen.style.display = "flex";
 
 
-    // RESET BACK HANDLER
+    // RESET HISTORY STATUS
 
     backHandlerActive = false;
 
@@ -441,7 +491,9 @@ document.addEventListener(
     function() {
 
         if (gameStarted) {
+
             resizeGame();
+
         }
 
     }
