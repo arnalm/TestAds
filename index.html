@@ -21,24 +21,19 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <style>
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    html, body {
-      width: 100%;
-      min-height: 100%;
-    }
-
     body {
+      width: 100%;
       min-height: 100vh;
       min-height: 100dvh;
       background: #1E293B;
       text-align: center;
-      padding: 20px 10px 40px 10px;
+      padding: 20px 10px 40px;
     }
 
     .logo {
@@ -64,7 +59,7 @@
       width: 240px;
       max-width: 90%;
       padding: 14px;
-      margin: 12px auto 0 auto;
+      margin: 12px auto 0;
       border: none;
       border-radius: 10px;
       font-size: 17px;
@@ -74,14 +69,6 @@
 
     button:active {
       transform: scale(.96);
-    }
-
-    #fullscreen-btn {
-      background: #007bff;
-      color: white;
-      padding: 10px 15px;
-      font-size: 15px;
-      margin-bottom: 15px;
     }
 
     #start-btn {
@@ -100,15 +87,10 @@
       color: white;
       border: 1px solid #6b7280;
     }
-
   </style>
 </head>
 
 <body>
-
-  <button id="fullscreen-btn" type="button">
-    ⛶ Full Screen
-  </button>
 
   <div class="logo">🚚⛽</div>
 
@@ -119,9 +101,11 @@
     Ready to Play?
   </p>
 
-  <button id="start-btn" type="button">
-    ▶ Play Now
-  </button>
+  <a href="./app.html" style="text-decoration:none; display:block;">
+    <button id="start-btn" type="button">
+      ▶ Play Now
+    </button>
+  </a>
 
   <button id="share-btn" class="secondary" type="button">
     📤 Share App
@@ -131,211 +115,69 @@
     📲 Install App
   </button>
 
-
   <script>
 
-    // 0. FULL SCREEN FUNCTION
-
-    async function enterFullScreen() {
-
-      const elem = document.documentElement;
-
-      try {
-
-        if (!document.fullscreenElement &&
-            !document.webkitFullscreenElement) {
-
-          if (elem.requestFullscreen) {
-            await elem.requestFullscreen();
-
-          } else if (elem.webkitRequestFullscreen) {
-            await elem.webkitRequestFullscreen();
-          }
-        }
-
-      } catch (error) {
-        console.log("Fullscreen not supported:", error);
-      }
-    }
-
-
-    // 1. LANDSCAPE MODE FUNCTION
-
-    async function lockLandscape() {
-
-      try {
-
-        if (screen.orientation &&
-            screen.orientation.lock) {
-
-          await screen.orientation.lock("landscape");
-        }
-
-      } catch (error) {
-        console.log("Landscape lock not supported:", error);
-      }
-    }
-
-
-    // 2. FULL SCREEN BUTTON
-
-    document.getElementById("fullscreen-btn")
-      .addEventListener("click", async () => {
-
-        if (document.fullscreenElement ||
-            document.webkitFullscreenElement) {
-
-          try {
-
-            if (document.exitFullscreen) {
-              await document.exitFullscreen();
-
-            } else if (document.webkitExitFullscreen) {
-              document.webkitExitFullscreen();
-            }
-
-          } catch (error) {
-            console.log(error);
-          }
-
-        } else {
-
-          await enterFullScreen();
-          await lockLandscape();
-
-        }
-
-      });
-
-
-    // 3. PLAY NOW BUTTON
-
-    document.getElementById("start-btn")
-      .addEventListener("click", async () => {
-
-        // Full Screen
-        await enterFullScreen();
-
-        // Landscape Mode
-        await lockLandscape();
-
-        // Open Game
-        window.location.href = "./app.html";
-
-      });
-
-
-    // 4. SERVICE WORKER REGISTRATION
+    // SERVICE WORKER
 
     if ("serviceWorker" in navigator) {
-
       window.addEventListener("load", () => {
-
         navigator.serviceWorker.register("./sw.js")
-
-          .then((reg) => {
+          .then(reg => {
             console.log("Service Worker registered:", reg.scope);
           })
-
-          .catch((err) => {
+          .catch(err => {
             console.error("Service Worker registration failed:", err);
           });
-
       });
-
     }
 
 
-    // 5. APP INSTALL BUTTON
+    // INSTALL APP
 
     let deferredPrompt = null;
 
     const installBtn = document.getElementById("install-btn");
 
-
     function isRunningAsInstalledPWA() {
-
       return (
-
         window.matchMedia("(display-mode: standalone)").matches ||
-
         window.matchMedia("(display-mode: fullscreen)").matches ||
-
         window.matchMedia("(display-mode: minimal-ui)").matches ||
-
         window.navigator.standalone === true ||
-
         document.referrer.includes("android-app://")
-
       );
-
     }
 
-
     async function hasRelatedInstalledApp() {
-
       if ("getInstalledRelatedApps" in navigator) {
-
         try {
-
-          const relatedApps =
-            await navigator.getInstalledRelatedApps();
-
-          return Array.isArray(relatedApps) &&
-            relatedApps.length > 0;
-
+          const apps = await navigator.getInstalledRelatedApps();
+          return Array.isArray(apps) && apps.length > 0;
         } catch (err) {
           return false;
         }
-
       }
-
       return false;
-
     }
-
 
     async function updateInstallButtonVisibility() {
-
-      if (isRunningAsInstalledPWA() ||
-          await hasRelatedInstalledApp()) {
-
+      if (isRunningAsInstalledPWA() || await hasRelatedInstalledApp()) {
         installBtn.style.display = "none";
         return;
-
       }
 
-      installBtn.style.display = deferredPrompt
-        ? "block"
-        : "none";
-
+      installBtn.style.display = deferredPrompt ? "block" : "none";
     }
-
 
     updateInstallButtonVisibility();
 
-
-    if (window.matchMedia("(display-mode: standalone)").addEventListener) {
-
-      window.matchMedia("(display-mode: standalone)")
-        .addEventListener("change", updateInstallButtonVisibility);
-
-    }
-
-
     window.addEventListener("beforeinstallprompt", async (event) => {
-
       event.preventDefault();
-
       deferredPrompt = event;
-
       await updateInstallButtonVisibility();
-
     });
 
-
     installBtn.addEventListener("click", async () => {
-
       if (!deferredPrompt) return;
 
       deferredPrompt.prompt();
@@ -347,65 +189,41 @@
       }
 
       deferredPrompt = null;
-
     });
-
 
     window.addEventListener("appinstalled", () => {
-
       installBtn.style.display = "none";
-
       deferredPrompt = null;
-
     });
 
 
-    // 6. SHARE APP BUTTON
+    // SHARE APP
 
     const shareBtn = document.getElementById("share-btn");
-
 
     shareBtn.addEventListener("click", async () => {
 
       const shareData = {
-
         title: "TIME & TEL Game",
-
         text: "🚚⛽ Play TIME & TEL Game! Try this amazing game!",
-
         url: window.location.href
-
       };
 
-
       if (navigator.share) {
-
         try {
-
           await navigator.share(shareData);
-
         } catch (error) {
-
           console.log("Sharing cancelled");
-
         }
-
       } else {
-
         try {
-
           await navigator.clipboard.writeText(
             shareData.text + " " + shareData.url
           );
-
           alert("Game link copied! Share it with your friends.");
-
         } catch (error) {
-
           prompt("Copy your game link:", shareData.url);
-
         }
-
       }
 
     });
