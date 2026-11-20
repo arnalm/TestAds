@@ -23,8 +23,6 @@ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable
 
 <style>
 
-/* BASIC RESET */
-
 * {
     margin: 0;
     padding: 0;
@@ -39,7 +37,7 @@ html, body {
     font-family: Arial, sans-serif;
 }
 
-/* FULLSCREEN BUTTON SCREEN */
+/* START SCREEN */
 
 #start-screen {
     width: 100%;
@@ -67,14 +65,14 @@ html, body {
     transform: scale(0.95);
 }
 
-/* GAME CONTAINER */
+/* GAME SCREEN */
 
 #game-container {
     display: none;
-    width: 100%;
-    height: 100%;
     position: fixed;
     inset: 0;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     background: #aaaaaa;
 }
@@ -85,24 +83,13 @@ html, body {
     height: 100%;
 }
 
-/* LANDSCAPE */
-
-@media (orientation: landscape) {
-
-    #game-container {
-        width: 100%;
-        height: 100%;
-    }
-
-}
-
 </style>
 
 </head>
 
 <body>
 
-<!-- FIRST SCREEN -->
+<!-- START SCREEN -->
 
 <div id="start-screen">
 
@@ -112,13 +99,10 @@ html, body {
 
 </div>
 
-
 <!-- GAME SCREEN -->
 
 <div id="game-container"></div>
 
-
-<!-- THREE JS GAME -->
 
 <script type="module">
 
@@ -138,7 +122,14 @@ const gameContainer =
 document.getElementById("game-container");
 
 
-/* SCENE */
+/* GAME STATUS */
+
+let gameStarted = false;
+
+let backHandlerActive = false;
+
+
+/* THREE JS SCENE */
 
 const scene = new THREE.Scene();
 
@@ -260,7 +251,9 @@ let target = 0;
 
 renderer.domElement.addEventListener(
     "pointerdown",
-    () => {
+    function() {
+
+        if (!gameStarted) return;
 
         target =
         target === 0 ? Math.PI / 2 : 0;
@@ -270,8 +263,6 @@ renderer.domElement.addEventListener(
 
 
 /* ANIMATION */
-
-let gameStarted = false;
 
 function animate() {
 
@@ -289,11 +280,12 @@ function animate() {
 animate();
 
 
-/* RESIZE GAME */
+/* RESIZE */
 
 function resizeGame() {
 
     const width = gameContainer.clientWidth;
+
     const height = gameContainer.clientHeight;
 
     if (!width || !height) return;
@@ -308,71 +300,183 @@ function resizeGame() {
 
 window.addEventListener("resize", resizeGame);
 
-window.addEventListener("orientationchange", () => {
-    setTimeout(resizeGame, 300);
-});
+
+/* BACK BUTTON SYSTEM */
+
+function enableBackButton() {
+
+    if (backHandlerActive) return;
+
+    history.pushState(
+        { gameScreen: true },
+        "",
+        window.location.href
+    );
+
+    backHandlerActive = true;
+
+}
 
 
-/* FULLSCREEN START */
+/* START GAME */
 
-fullscreenBtn.addEventListener("click", async function() {
+fullscreenBtn.addEventListener(
+    "click",
+    async function() {
 
-    // FULLSCREEN
+        if (gameStarted) return;
 
-    try {
 
-        if (!document.fullscreenElement) {
+        // FULLSCREEN
 
-            await document.documentElement.requestFullscreen();
+        try {
+
+            if (!document.fullscreenElement) {
+
+                await document.documentElement.requestFullscreen();
+
+            }
+
+        } catch(error) {
+
+            console.log("Fullscreen error:", error);
 
         }
 
-    } catch(error) {
 
-        console.log("Fullscreen error:", error);
+        // LANDSCAPE
 
-    }
+        try {
 
+            if (
+                screen.orientation &&
+                screen.orientation.lock
+            ) {
 
-    // LANDSCAPE LOCK
+                await screen.orientation.lock("landscape");
 
-    try {
+            }
 
-        if (
-            screen.orientation &&
-            screen.orientation.lock
-        ) {
+        } catch(error) {
 
-            await screen.orientation.lock("landscape");
+            console.log("Landscape error:", error);
 
         }
 
-    } catch(error) {
 
-        console.log("Landscape lock error:", error);
+        // HISTORY
+
+        enableBackButton();
+
+
+        // HIDE START SCREEN
+
+        startScreen.style.display = "none";
+
+
+        // SHOW GAME
+
+        gameContainer.style.display = "block";
+
+
+        // START GAME
+
+        gameStarted = true;
+
+        resizeGame();
+
+        renderer.render(scene, camera);
 
     }
+);
 
 
-    // HIDE START SCREEN
+/* BACK BUTTON PRESSED */
 
-    startScreen.style.display = "none";
+window.addEventListener(
+    "popstate",
+    async function() {
+
+        if (!gameStarted) return;
 
 
-    // SHOW GAME
+        // STOP GAME
 
-    gameContainer.style.display = "block";
+        gameStarted = false;
 
 
-    // START ANIMATION
+        // HIDE GAME
 
-    gameStarted = true;
+        gameContainer.style.display = "none";
 
-    resizeGame();
 
-    renderer.render(scene, camera);
+        // RESET DOOR
 
-});
+        target = 0;
+
+        pivot.rotation.y = 0;
+
+
+        // EXIT FULLSCREEN
+
+        if (document.fullscreenElement) {
+
+            try {
+
+                await document.exitFullscreen();
+
+            } catch(error) {
+
+                console.log(error);
+
+            }
+
+        }
+
+
+        // UNLOCK ORIENTATION
+
+        try {
+
+            if (screen.orientation &&
+                screen.orientation.unlock) {
+
+                screen.orientation.unlock();
+
+            }
+
+        } catch(error) {
+
+            console.log(error);
+
+        }
+
+
+        // SHOW FULLSCREEN BUTTON
+
+        startScreen.style.display = "flex";
+
+
+        // RESET BACK HANDLER
+
+        backHandlerActive = false;
+
+    }
+);
+
+
+/* BROWSER FULLSCREEN CHANGE */
+
+document.addEventListener(
+    "fullscreenchange",
+    function() {
+
+        if (gameStarted) {
+            resizeGame();
+        }
+
+    }
+);
 
 </script>
 
