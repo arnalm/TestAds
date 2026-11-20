@@ -1,137 +1,239 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-<title>TIME & TEL</title>
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-<meta name="theme-color" content="#1E293B">
-<meta name="description" content="Play TIME & TEL Game">
+<title>TIME & TEL GAME</title>
 
 <link rel="manifest" href="./manifest.json">
 
+<meta name="theme-color" content="#1E293B">
+
+<meta name="mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
 <style>
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body {
-    min-height: 100vh;
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #aaaaaa;
+    touch-action: manipulation;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#fullscreen-btn {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    padding: 10px 15px;
     background: #1E293B;
     color: white;
-    text-align: center;
-    padding: 20px 10px;
-    font-family: Arial, sans-serif;
-}
-
-.logo {
-    font-size: 65px;
-    margin: 35px 0 15px;
-}
-
-h1 {
-    color: #fbbf24;
-    font-size: 38px;
-    margin-bottom: 15px;
-}
-
-.subtitle {
-    color: #d1d5db;
-    line-height: 1.6;
-    margin-bottom: 25px;
-}
-
-button {
-    display: block;
-    width: 240px;
-    max-width: 90%;
-    padding: 15px;
-    margin: 15px auto;
-    border: none;
-    border-radius: 10px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-#start-btn {
-    background: #fbbf24;
-    color: #111827;
-}
-
-.secondary {
-    background: #374151;
-    color: white;
+    border: 0;
+    border-radius: 8px;
+    font-size: 14px;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<div class="logo">🚚⛽</div>
-
-<h1>TIME & TEL</h1>
-
-<p class="subtitle">
-Welcome to Time & Tel Game!<br>
-Ready to Play?
-</p>
-
-<button id="start-btn">
-▶ Play Now
-</button>
-
-<button class="secondary" id="share-btn">
-📤 Share App
-</button>
+<button id="fullscreen-btn">⛶ Fullscreen</button>
 
 <script>
 
-// PLAY GAME
-document.getElementById("start-btn").addEventListener("click", function() {
+// FULLSCREEN + LANDSCAPE
 
-    window.location.href = "./app.html";
-
-});
-
-// SHARE APP
-document.getElementById("share-btn").addEventListener("click", async function() {
-
-    const shareData = {
-        title: "TIME & TEL Game",
-        text: "🚚⛽ Play TIME & TEL Game!",
-        url: window.location.href
-    };
+async function startGameDisplay() {
 
     try {
 
-        if (navigator.share) {
-            await navigator.share(shareData);
-        } else {
-            await navigator.clipboard.writeText(
-                shareData.text + " " + shareData.url
-            );
-            alert("Game link copied!");
+        if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen();
         }
 
     } catch(error) {
-        console.log(error);
+        console.log("Fullscreen unavailable:", error);
     }
+
+    try {
+
+        if (screen.orientation &&
+            screen.orientation.lock) {
+
+            await screen.orientation.lock("landscape");
+        }
+
+    } catch(error) {
+        console.log("Landscape unavailable:", error);
+    }
+
+}
+
+document.getElementById("fullscreen-btn")
+.addEventListener("click", startGameDisplay);
+
+</script>
+
+<script type="module">
+
+import * as THREE from
+"https://unpkg.com/three@0.160.0/build/three.module.js";
+
+// SCENE
+
+const scene = new THREE.Scene();
+
+scene.background = new THREE.Color(0xaaaaaa);
+
+// CAMERA
+
+const camera = new THREE.PerspectiveCamera(
+    35,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    100
+);
+
+camera.position.set(4, 3, 6);
+camera.lookAt(0, 1, 0);
+
+// RENDERER
+
+const renderer = new THREE.WebGLRenderer({
+    antialias: true
+});
+
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+document.body.appendChild(renderer.domElement);
+
+// LIGHT
+
+scene.add(
+    new THREE.HemisphereLight(0xffffff, 0x444444, 2)
+);
+
+const light = new THREE.DirectionalLight(0xffffff, 2);
+
+light.position.set(5, 10, 5);
+
+scene.add(light);
+
+// FLOOR
+
+const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(10, 10),
+    new THREE.MeshStandardMaterial({
+        color: 0x808080,
+        wireframe: true
+    })
+);
+
+floor.rotation.x = -Math.PI / 2;
+
+scene.add(floor);
+
+// DOOR FRAME
+
+const frame = new THREE.Mesh(
+    new THREE.BoxGeometry(0.1, 2.2, 1.2),
+    new THREE.MeshStandardMaterial({
+        color: 0x444444,
+        wireframe: true
+    })
+);
+
+frame.position.set(0, 1.1, 0);
+
+scene.add(frame);
+
+// DOOR PIVOT
+
+const pivot = new THREE.Group();
+
+pivot.position.set(0, 0, 0);
+
+scene.add(pivot);
+
+// DOOR
+
+const door = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 2, 0.08),
+    new THREE.MeshStandardMaterial({
+        color: 0x8b4513,
+        wireframe: true
+    })
+);
+
+door.position.set(0.5, 1, 0);
+
+pivot.add(door);
+
+// DOOR OPEN / CLOSE
+
+let target = 0;
+
+renderer.domElement.addEventListener("pointerdown", () => {
+
+    target = target === 0 ? Math.PI / 2 : 0;
 
 });
 
-// SERVICE WORKER
-if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function() {
-        navigator.serviceWorker.register("./sw.js")
-        .catch(error => console.log(error));
-    });
+// ANIMATION
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    pivot.rotation.y +=
+    (target - pivot.rotation.y) * 0.08;
+
+    renderer.render(scene, camera);
+
 }
+
+animate();
+
+// SCREEN RESIZE
+
+window.addEventListener("resize", () => {
+
+    camera.aspect =
+    window.innerWidth / window.innerHeight;
+
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+
+});
 
 </script>
 
