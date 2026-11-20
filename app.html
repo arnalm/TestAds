@@ -321,6 +321,43 @@ function enableBackButton() {
 }
 
 
+/* EXIT GAME */
+
+function exitGame() {
+
+    if (!gameStarted || exitingGame) return;
+
+    exitingGame = true;
+
+    // STOP GAME
+
+    gameStarted = false;
+
+
+    // HIDE GAME
+
+    gameContainer.style.display = "none";
+
+
+    // RESET DOOR
+
+    target = 0;
+
+    pivot.rotation.y = 0;
+
+
+    // SHOW ENTER FULLSCREEN BUTTON
+
+    startScreen.style.display = "flex";
+
+
+    // RESET STATUS
+
+    exitingGame = false;
+
+}
+
+
 /* START GAME */
 
 fullscreenBtn.addEventListener(
@@ -346,7 +383,7 @@ fullscreenBtn.addEventListener(
         }
 
 
-        // LANDSCAPE
+        // LANDSCAPE LOCK
 
         try {
 
@@ -378,18 +415,19 @@ fullscreenBtn.addEventListener(
         enableBackButton();
 
 
-        // SHOW GAME
+        // HIDE START SCREEN
 
         startScreen.style.display = "none";
+
+
+        // SHOW GAME
 
         gameContainer.style.display = "block";
 
 
-        // START
+        // START GAME
 
         gameStarted = true;
-
-        exitingGame = false;
 
         resizeGame();
 
@@ -397,43 +435,6 @@ fullscreenBtn.addEventListener(
 
     }
 );
-
-
-/* EXIT GAME */
-
-function exitGame() {
-
-    if (!gameStarted || exitingGame) return;
-
-    exitingGame = true;
-
-    // STOP GAME
-
-    gameStarted = false;
-
-
-    // HIDE GAME
-
-    gameContainer.style.display = "none";
-
-
-    // RESET DOOR
-
-    target = 0;
-
-    pivot.rotation.y = 0;
-
-
-    // SHOW START BUTTON
-
-    startScreen.style.display = "flex";
-
-
-    // DO NOT EXIT FULLSCREEN HERE
-
-    // DO NOT UNLOCK ORIENTATION
-
-}
 
 
 /* BACK BUTTON */
@@ -444,11 +445,19 @@ window.addEventListener(
 
         if (gameStarted) {
 
+            // FIRST BACK: EXIT GAME
+
             exitGame();
+
+            // HISTORY ENTRY HAS BEEN CONSUMED
 
             gameHistoryAdded = false;
 
         }
+
+        // SECOND BACK:
+        // NO NEW HISTORY ENTRY IS CREATED.
+        // BROWSER CAN NAVIGATE BACK NORMALLY.
 
     }
 );
@@ -461,6 +470,8 @@ document.addEventListener(
     function() {
 
         if (!document.fullscreenElement && gameStarted) {
+
+            // FULLSCREEN EXITED
 
             exitGame();
 
