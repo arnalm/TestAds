@@ -9,7 +9,7 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-<title>TIMEA & TEL GAME</title>
+<title>TIMEB & TEL GAME</title>
 
 <link rel="manifest" href="./manifest.json">
 
@@ -285,6 +285,7 @@ animate();
 function resizeGame() {
 
     const width = gameContainer.clientWidth;
+
     const height = gameContainer.clientHeight;
 
     if (!width || !height) return;
@@ -365,6 +366,7 @@ fullscreenBtn.addEventListener(
         // RESET DOOR
 
         target = 0;
+
         pivot.rotation.y = 0;
 
 
@@ -414,12 +416,8 @@ function exitGame() {
     // RESET DOOR
 
     target = 0;
+
     pivot.rotation.y = 0;
-
-
-    // DO NOT UNLOCK LANDSCAPE
-
-    // DO NOT EXIT FULLSCREEN
 
 
     // SHOW ENTER FULLSCREEN BUTTON
@@ -427,7 +425,7 @@ function exitGame() {
     startScreen.style.display = "flex";
 
 
-    // RESET HISTORY STATUS
+    // RESET BACK HANDLER
 
     backHandlerActive = false;
 
@@ -454,8 +452,20 @@ document.addEventListener(
     "fullscreenchange",
     function() {
 
-        if (gameStarted) {
+        // FULLSCREEN EXITED
+
+        if (!document.fullscreenElement && gameStarted) {
+
+            exitGame();
+
+        }
+
+        // FULLSCREEN ACTIVE
+
+        if (document.fullscreenElement && gameStarted) {
+
             resizeGame();
+
         }
 
     }
