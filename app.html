@@ -40,38 +40,52 @@ body {
 <body>
   
 <script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    try {
-      const registration =
-        await navigator.serviceWorker.register("./sw.js");
 
-      console.log("Service Worker Registered:", registration.scope);
-    } catch (error) {
-      console.error("Service Worker Registration Failed:", error);
+// FULL SCREEN MODE
+async function enterGameFullscreen() {
+  try {
+    const elem = document.documentElement;
+
+    if (!document.fullscreenElement) {
+      if (elem.requestFullscreen) {
+        await elem.requestFullscreen();
+      }
     }
-  });
+  } catch (error) {
+    console.log("Fullscreen not supported:", error);
+  }
 }
+
+
+// LANDSCAPE MODE
+async function setGameLandscape() {
+  try {
+    if (screen.orientation &&
+        screen.orientation.lock) {
+
+      await screen.orientation.lock("landscape");
+    }
+  } catch (error) {
+    console.log("Landscape lock not supported:", error);
+  }
+}
+
+
+// START GAME DISPLAY
+async function startGameDisplay() {
+  await enterGameFullscreen();
+  await setGameLandscape();
+}
+
+
+// USER INTERACTION
+document.addEventListener("click", startGameDisplay, {
+  once: true
+});
+
 </script>
 
-<!-- Your existing app code -->
-
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    try {
-      const registration =
-        await navigator.serviceWorker.register("./sw.js");
-
-      console.log("PWA Ready!");
-    } catch (error) {
-      console.error(error);
-    }
-  });
-}
-</script>
-
-  
+<!-------------------->
   
 
    
