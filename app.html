@@ -19,7 +19,11 @@ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
 <style>
+
+/* BASIC RESET */
 
 * {
     margin: 0;
@@ -31,27 +35,65 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #aaaaaa;
-    touch-action: manipulation;
+    background: #1E293B;
+    font-family: Arial, sans-serif;
 }
 
-canvas {
+/* FULLSCREEN BUTTON SCREEN */
+
+#start-screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #1E293B;
+}
+
+/* FULLSCREEN BUTTON */
+
+#fullscreen-btn {
+    padding: 18px 30px;
+    background: #fbbf24;
+    color: #111827;
+    border: none;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#fullscreen-btn:active {
+    transform: scale(0.95);
+}
+
+/* GAME CONTAINER */
+
+#game-container {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #aaaaaa;
+}
+
+#game-container canvas {
     display: block;
     width: 100%;
     height: 100%;
 }
 
-#fullscreen-btn {
-    position: fixed;
-    top: 12px;
-    right: 12px;
-    z-index: 10;
-    padding: 10px 15px;
-    background: #1E293B;
-    color: white;
-    border: 0;
-    border-radius: 8px;
-    font-size: 14px;
+/* LANDSCAPE */
+
+@media (orientation: landscape) {
+
+    #game-container {
+        width: 100%;
+        height: 100%;
+    }
+
 }
 
 </style>
@@ -60,55 +102,50 @@ canvas {
 
 <body>
 
-<button id="fullscreen-btn">⛶ Fullscreen</button>
+<!-- FIRST SCREEN -->
 
-<script>
+<div id="start-screen">
 
-// FULLSCREEN + LANDSCAPE
+    <button id="fullscreen-btn">
+        ⛶ ENTER FULLSCREEN
+    </button>
 
-async function startGameDisplay() {
+</div>
 
-    try {
 
-        if (!document.fullscreenElement) {
-            await document.documentElement.requestFullscreen();
-        }
+<!-- GAME SCREEN -->
 
-    } catch(error) {
-        console.log("Fullscreen unavailable:", error);
-    }
+<div id="game-container"></div>
 
-    try {
 
-        if (screen.orientation &&
-            screen.orientation.lock) {
-
-            await screen.orientation.lock("landscape");
-        }
-
-    } catch(error) {
-        console.log("Landscape unavailable:", error);
-    }
-
-}
-
-document.getElementById("fullscreen-btn")
-.addEventListener("click", startGameDisplay);
-
-</script>
+<!-- THREE JS GAME -->
 
 <script type="module">
 
 import * as THREE from
 "https://unpkg.com/three@0.160.0/build/three.module.js";
 
-// SCENE
+
+/* ELEMENTS */
+
+const startScreen =
+document.getElementById("start-screen");
+
+const fullscreenBtn =
+document.getElementById("fullscreen-btn");
+
+const gameContainer =
+document.getElementById("game-container");
+
+
+/* SCENE */
 
 const scene = new THREE.Scene();
 
 scene.background = new THREE.Color(0xaaaaaa);
 
-// CAMERA
+
+/* CAMERA */
 
 const camera = new THREE.PerspectiveCamera(
     35,
@@ -118,36 +155,53 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 camera.position.set(4, 3, 6);
+
 camera.lookAt(0, 1, 0);
 
-// RENDERER
+
+/* RENDERER */
 
 const renderer = new THREE.WebGLRenderer({
     antialias: true
 });
 
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-renderer.setSize(window.innerWidth, window.innerHeight);
-
-document.body.appendChild(renderer.domElement);
-
-// LIGHT
-
-scene.add(
-    new THREE.HemisphereLight(0xffffff, 0x444444, 2)
+renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio, 2)
 );
 
-const light = new THREE.DirectionalLight(0xffffff, 2);
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+gameContainer.appendChild(renderer.domElement);
+
+
+/* LIGHT */
+
+scene.add(
+    new THREE.HemisphereLight(
+        0xffffff,
+        0x444444,
+        2
+    )
+);
+
+const light = new THREE.DirectionalLight(
+    0xffffff,
+    2
+);
 
 light.position.set(5, 10, 5);
 
 scene.add(light);
 
-// FLOOR
+
+/* FLOOR */
 
 const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(10, 10),
+
     new THREE.MeshStandardMaterial({
         color: 0x808080,
         wireframe: true
@@ -158,10 +212,12 @@ floor.rotation.x = -Math.PI / 2;
 
 scene.add(floor);
 
-// DOOR FRAME
+
+/* DOOR FRAME */
 
 const frame = new THREE.Mesh(
     new THREE.BoxGeometry(0.1, 2.2, 1.2),
+
     new THREE.MeshStandardMaterial({
         color: 0x444444,
         wireframe: true
@@ -172,7 +228,8 @@ frame.position.set(0, 1.1, 0);
 
 scene.add(frame);
 
-// DOOR PIVOT
+
+/* DOOR PIVOT */
 
 const pivot = new THREE.Group();
 
@@ -180,10 +237,12 @@ pivot.position.set(0, 0, 0);
 
 scene.add(pivot);
 
-// DOOR
+
+/* DOOR */
 
 const door = new THREE.Mesh(
     new THREE.BoxGeometry(1, 2, 0.08),
+
     new THREE.MeshStandardMaterial({
         color: 0x8b4513,
         wireframe: true
@@ -194,21 +253,31 @@ door.position.set(0.5, 1, 0);
 
 pivot.add(door);
 
-// DOOR OPEN / CLOSE
+
+/* DOOR OPEN / CLOSE */
 
 let target = 0;
 
-renderer.domElement.addEventListener("pointerdown", () => {
+renderer.domElement.addEventListener(
+    "pointerdown",
+    () => {
 
-    target = target === 0 ? Math.PI / 2 : 0;
+        target =
+        target === 0 ? Math.PI / 2 : 0;
 
-});
+    }
+);
 
-// ANIMATION
+
+/* ANIMATION */
+
+let gameStarted = false;
 
 function animate() {
 
     requestAnimationFrame(animate);
+
+    if (!gameStarted) return;
 
     pivot.rotation.y +=
     (target - pivot.rotation.y) * 0.08;
@@ -219,19 +288,89 @@ function animate() {
 
 animate();
 
-// SCREEN RESIZE
 
-window.addEventListener("resize", () => {
+/* RESIZE GAME */
 
-    camera.aspect =
-    window.innerWidth / window.innerHeight;
+function resizeGame() {
+
+    const width = gameContainer.clientWidth;
+    const height = gameContainer.clientHeight;
+
+    if (!width || !height) return;
+
+    camera.aspect = width / height;
 
     camera.updateProjectionMatrix();
 
-    renderer.setSize(
-        window.innerWidth,
-        window.innerHeight
-    );
+    renderer.setSize(width, height);
+
+}
+
+window.addEventListener("resize", resizeGame);
+
+window.addEventListener("orientationchange", () => {
+    setTimeout(resizeGame, 300);
+});
+
+
+/* FULLSCREEN START */
+
+fullscreenBtn.addEventListener("click", async function() {
+
+    // FULLSCREEN
+
+    try {
+
+        if (!document.fullscreenElement) {
+
+            await document.documentElement.requestFullscreen();
+
+        }
+
+    } catch(error) {
+
+        console.log("Fullscreen error:", error);
+
+    }
+
+
+    // LANDSCAPE LOCK
+
+    try {
+
+        if (
+            screen.orientation &&
+            screen.orientation.lock
+        ) {
+
+            await screen.orientation.lock("landscape");
+
+        }
+
+    } catch(error) {
+
+        console.log("Landscape lock error:", error);
+
+    }
+
+
+    // HIDE START SCREEN
+
+    startScreen.style.display = "none";
+
+
+    // SHOW GAME
+
+    gameContainer.style.display = "block";
+
+
+    // START ANIMATION
+
+    gameStarted = true;
+
+    resizeGame();
+
+    renderer.render(scene, camera);
 
 });
 
